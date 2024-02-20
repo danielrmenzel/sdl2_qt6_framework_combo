@@ -1,7 +1,9 @@
+// SDLApp.cpp
+
 #include "SDLApp.h"
 #include <QDebug>
 
-SDLApp::SDLApp(QObject *parent) : QObject(parent), window(nullptr), renderer(nullptr), drawLineFlag(false), quit(false), textInputMode(false), textInputBuffer(""), font(nullptr), buttonText("Enter Text") {
+SDLApp::SDLApp(QObject *parent) : QObject(parent), window(nullptr), renderer(nullptr), drawLineFlag(false), quit(false), textInputMode(false), textInputBuffer(""), font(nullptr) {
     if (!init()) {
         qDebug() << "Failed to initialize SDLApp.";
     }
@@ -18,7 +20,6 @@ bool SDLApp::init() {
         return false;
     }
 
-    // Initialize SDL_ttf
     if (TTF_Init() == -1) {
         qDebug() << "TTF_Init Error:" << TTF_GetError();
         return false;
@@ -36,14 +37,13 @@ bool SDLApp::init() {
         return false;
     }
 
-    // Load font
-    font = TTF_OpenFont("/home/dan/old/assets/pacifico/Pacifico.ttf", 24); // Adjust path and size as needed
+    font = TTF_OpenFont("/home/dan/old/assets/pacifico/Pacifico.ttf", 24);
     if (!font) {
         qDebug() << "Failed to load font:" << TTF_GetError();
         return false;
     }
 
-    textColor = {255, 255, 255}; // Set text color to white
+    textColor = {255, 255, 255};
 
     qDebug() << "SDLApp initialized successfully.";
     return true;
@@ -63,6 +63,10 @@ void SDLApp::processEvents() {
         case SDL_KEYDOWN:
             if (textInputMode && e.key.keysym.sym == SDLK_RETURN) {
                 textInputMode = false;
+                buttonText = "Enter Text";
+                emit textEntered(QString::fromStdString(textInputBuffer));
+                textInputBuffer.clear();
+                render();
             }
             break;
         case SDL_MOUSEBUTTONDOWN:
@@ -113,11 +117,11 @@ void SDLApp::renderText(const std::string& message, int x, int y, int fontSize) 
 }
 
 void SDLApp::renderButton(SDL_Renderer* renderer, const char* text, int x, int y) {
-    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); // Green color
+    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
     SDL_Rect buttonRect = {x, y, BUTTON_WIDTH, BUTTON_HEIGHT};
     SDL_RenderFillRect(renderer, &buttonRect);
 
-    renderText(text, x + 10, y + 10, 16); // Adjust the position of text as per your requirement
+    renderText(text, x + 10, y + 10, 16);
 }
 
 bool SDLApp::isMouseInsideButton(int mouseX, int mouseY, int buttonX, int buttonY) {
@@ -128,55 +132,43 @@ void SDLApp::handleButtonClick(SDL_Event& event) {
     int mouseX, mouseY;
     SDL_GetMouseState(&mouseX, &mouseY);
 
-    // Check if button 1 is clicked
-    if (isMouseInsideButton(mouseX, mouseY, buttonX, buttonY)) {
-        if (textInputMode) {
-            textInputMode = false;
-            buttonText = "Enter Text"; // Update button text immediately
-            SDL_StopTextInput();
-            textInputBuffer.clear(); // Clear text input buffer
-            qDebug() << "Button 1 clicked. Text input disabled.";
-        } else {
-            if (buttonText == "Enter Text") {
-                textInputMode = true;
-                buttonText = "Submit entered text";
-                SDL_StartTextInput();
-                qDebug() << "Button 1 clicked. Text input enabled.";
-            } else {
-                textInputMode = false;
-                buttonText = "Enter Text"; // Update button text immediately
-                SDL_StopTextInput();
-                textInputBuffer.clear(); // Clear text input buffer
-                qDebug() << "Button 1 clicked. Text input disabled.";
-            }
+    if (textInputMode) {
+        textInputMode = false;
+        buttonText = "Enter Text";
+        emit textEntered(QString::fromStdString(textInputBuffer));
+        textInputBuffer.clear();
+        render();
+    } else {
+        if (isMouseInsideButton(mouseX, mouseY, buttonX, buttonY)) {
+            textInputMode = true;
+            SDL_StartTextInput();
+            buttonText = "Submit entered text";
+            qDebug() << "Button 1 clicked. Text input enabled.";
+            render();
+        } else if (isMouseInsideButton(mouseX, mouseY, buttonX + BUTTON_WIDTH + 20, buttonY)) {
+            qDebug() << "Button 2 clicked. Closing window.";
+            SDL_Event quitEvent;
+            quitEvent.type = SDL_QUIT;
+            SDL_PushEvent(&quitEvent);
         }
-        render(); // Render immediately after button click to update button text
-    } else if (isMouseInsideButton(mouseX, mouseY, buttonX + BUTTON_WIDTH + 20, buttonY)) {
-        qDebug() << "Button 2 clicked. Closing window.";
-        SDL_Event quitEvent;
-        quitEvent.type = SDL_QUIT;
-        SDL_PushEvent(&quitEvent);
     }
 }
-
-
-
 
 void SDLApp::handleTextInput(SDL_Event& event) {
     if (textInputMode) {
         textInputBuffer += event.text.text;
-        render(); // Render text after each input
+        render();
     }
 }
 
 void SDLApp::render() {
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // Black background
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
-    renderButton(renderer, buttonText.c_str(), buttonX, buttonY); // Button 1
-    renderButton(renderer, "Close Window", buttonX + BUTTON_WIDTH + 20, buttonY); // Button 2
+    renderButton(renderer, buttonText.c_str(), buttonX, buttonY);
+    renderButton(renderer, "Close Window", buttonX + BUTTON_WIDTH + 20, buttonY);
 
-    renderText(textInputBuffer, 50, 50, 24); // Render input text
+    renderText(textInputBuffer, 50, 50, 24);
 
     SDL_RenderPresent(renderer);
 }

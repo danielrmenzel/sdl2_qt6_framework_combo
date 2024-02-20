@@ -1,3 +1,5 @@
+// SDLApp.h
+
 #ifndef SDLAPP_H
 #define SDLAPP_H
 
@@ -17,30 +19,27 @@ public:
     bool shouldQuit() const;
     void cleanUp();
 
+signals:
+    void textEntered(const QString& text);
+
 private:
     SDL_Window* window;
     SDL_Renderer* renderer;
     bool drawLineFlag;
     bool quit;
+    std::string buttonText; // Added member variable
 
-    // Button constants
     static constexpr int BUTTON_WIDTH = 200;
     static constexpr int BUTTON_HEIGHT = 50;
     int buttonX = 220;
     int buttonY = 200;
 
-    // Text input handling
     bool textInputMode;
     std::string textInputBuffer;
 
-    // Font and text color
     TTF_Font* font;
     SDL_Color textColor;
 
-    // Button text
-    std::string buttonText;
-
-    // Helper functions
     void render();
     void renderText(const std::string& message, int x, int y, int fontSize);
     void renderButton(SDL_Renderer* renderer, const char* text, int x, int y);
