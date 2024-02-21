@@ -1,12 +1,11 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 #include <QPushButton>
-#include <QTimer> // Include QTimer header
+#include <QMessageBox>
+#include <QTimer>
 
 MainWindow::MainWindow(SDLApp *sdlApp, QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
-    , sdlApp(sdlApp) // Store the SDLApp instance
+    : QMainWindow(parent), ui(new Ui::MainWindow), sdlApp(sdlApp)
 {
     ui->setupUi(this);
 
@@ -14,7 +13,12 @@ MainWindow::MainWindow(SDLApp *sdlApp, QWidget *parent)
     toggleLineButton->setGeometry(10, 10, 100, 30);
     connect(toggleLineButton, &QPushButton::clicked, this, &MainWindow::onToggleLineButtonClicked);
 
-    // Setup a QTimer to periodically call SDLApp's processEvents method
+    // Initialize and setup displayTextLabel
+    displayTextLabel = new QLabel(this);
+    displayTextLabel->setGeometry(120, 50, 400, 30); // Adjust these values as needed for your layout
+
+    connect(sdlApp, &SDLApp::textEntered, this, &MainWindow::onTextEntered);
+
     sdlTimer = new QTimer(this);
     connect(sdlTimer, &QTimer::timeout, sdlApp, &SDLApp::processEvents);
     sdlTimer->start(16); // Run approximately every 60Hz (16ms)
@@ -26,10 +30,14 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::onToggleLineButtonClicked() {
-    sdlApp->toggleLine(); // Toggle the line in SDLApp
+    sdlApp->toggleLine();
+}
+
+void MainWindow::onTextEntered(const QString& text) {
+    displayTextLabel->setText(text);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
-    sdlApp->cleanUp(); // Ensure SDL cleanup is called
-    QMainWindow::closeEvent(event); // Proceed with the usual close event
+    sdlApp->cleanUp();
+    QMainWindow::closeEvent(event);
 }

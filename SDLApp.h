@@ -1,11 +1,10 @@
-// SDLApp.h
-
 #ifndef SDLAPP_H
 #define SDLAPP_H
 
 #include <QObject>
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include <string>
 
 class SDLApp : public QObject {
     Q_OBJECT
@@ -20,7 +19,7 @@ public:
     void cleanUp();
 
 signals:
-    void textEntered(const QString& text);
+    void textEntered(const QString& text); // Signal to notify when text is entered
 
 private:
     SDL_Window* window;

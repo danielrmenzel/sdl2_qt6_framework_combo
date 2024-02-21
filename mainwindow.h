@@ -1,9 +1,9 @@
-// mainwindow.h
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include <QMainWindow>
 #include "SDLApp.h"
+#include <QLabel> // Include QLabel
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -18,12 +18,14 @@ public:
     ~MainWindow();
 
 private slots:
-    void onToggleLineButtonClicked(); // Slot to handle button click
+    void onToggleLineButtonClicked();
+    void onTextEntered(const QString& text); // Slot to handle text submission
 
 private:
     Ui::MainWindow *ui;
-    SDLApp *sdlApp; // Pointer to SDLApp instance
-    QTimer *sdlTimer; // Timer for processing SDL events
+    SDLApp *sdlApp;
+    QTimer *sdlTimer;
+    QLabel *displayTextLabel; // Add QLabel member variable
 
 protected:
     void closeEvent(QCloseEvent *event) override;
