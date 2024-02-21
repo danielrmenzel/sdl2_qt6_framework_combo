@@ -4,6 +4,7 @@
 #include <QObject>
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include <SDL_image.h>
 #include <string>
 
 class SDLApp : public QObject {
@@ -20,10 +21,12 @@ public:
 
 signals:
     void textEntered(const QString& text); // Signal to notify when text is entered
+    void quitApplication();
 
 private:
     SDL_Window* window;
     SDL_Renderer* renderer;
+    SDL_Texture* imageTexture; // Member variable to hold the image texture
     bool drawLineFlag;
     bool quit;
     std::string buttonText; // Added member variable
