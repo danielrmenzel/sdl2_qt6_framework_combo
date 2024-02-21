@@ -145,16 +145,26 @@ void SDLApp::renderButton(SDL_Renderer* renderer, const char* text, int x, int y
     renderText(text, x + 10, y + 10, 16);
 }
 
-bool SDLApp::isMouseInsideButton(int mouseX, int mouseY, int buttonX, int buttonY) {
-    return (mouseX >= buttonX && mouseX <= buttonX + BUTTON_WIDTH && mouseY >= buttonY && mouseY <= buttonY + BUTTON_HEIGHT);
+bool SDLApp::isMouseInsideButton(int mouseX, int mouseY, int buttonX, int buttonY, int buttonWidth, int buttonHeight) {
+    return (mouseX >= buttonX && mouseX <= buttonX + buttonWidth && mouseY >= buttonY && mouseY <= buttonY + buttonHeight);
 }
+
+
 
 void SDLApp::handleButtonClick(SDL_Event& event) {
     int mouseX, mouseY;
     SDL_GetMouseState(&mouseX, &mouseY);
 
+    // Calculate button positions based on input field dimensions
+    int inputFieldX = 50;
+    int inputFieldY = 140;
+    int inputFieldWidth = 540;
+    int inputFieldHeight = 50;
+    int buttonX1 = inputFieldX + inputFieldWidth / 4 - BUTTON_WIDTH / 2;
+    int buttonX2 = inputFieldX + inputFieldWidth * 3 / 4 - BUTTON_WIDTH / 2;
+
     // Button 1 area check
-    if (isMouseInsideButton(mouseX, mouseY, buttonX, buttonY)) {
+    if (isMouseInsideButton(mouseX, mouseY, buttonX1, buttonY, BUTTON_WIDTH, BUTTON_HEIGHT)) {
         if (textInputMode) {
             // Only if we are in text input mode, we process the text submission
             textInputMode = false;
@@ -170,7 +180,7 @@ void SDLApp::handleButtonClick(SDL_Event& event) {
             buttonText = "Submit Text";
             render();
         }
-    } else if (isMouseInsideButton(mouseX, mouseY, buttonX + BUTTON_WIDTH + 20, buttonY)) {
+    } else if (isMouseInsideButton(mouseX, mouseY, buttonX2, buttonY, BUTTON_WIDTH, BUTTON_HEIGHT)) {
         // Handle other button clicks, for example, closing the application
         qDebug() << "Button 2 clicked. Closing window.";
         quit = true;
@@ -181,13 +191,13 @@ void SDLApp::handleButtonClick(SDL_Event& event) {
     // Clicks outside of button areas do not change textInputMode
 }
 
+
 void SDLApp::handleTextInput(SDL_Event& event) {
     if (textInputMode) {
         textInputBuffer += event.text.text;
         render();
     }
 }
-
 void SDLApp::render() {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // Background color
     SDL_RenderClear(renderer);
@@ -198,23 +208,35 @@ void SDLApp::render() {
 
     SDL_RenderCopy(renderer, imageTexture, NULL, &destRect);
 
-    // Always draw the white rectangle for text input
+    // Calculate input field position and size
+    int inputFieldX = 50;
+    int inputFieldY = 140;
+    int inputFieldWidth = 540;
+    int inputFieldHeight = 50;
+
+    // Draw the white input field
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // White color
-    SDL_Rect inputRect = {50, 140, 540, 50}; // Adjust as needed
+    SDL_Rect inputRect = {inputFieldX, inputFieldY, inputFieldWidth, inputFieldHeight};
     SDL_RenderFillRect(renderer, &inputRect);
 
     // Reset drawing color for other elements
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 
-    // Draw other UI elements
-    renderButton(renderer, buttonText.c_str(), buttonX, buttonY);
-    renderButton(renderer, "Close Window", buttonX + BUTTON_WIDTH + 20, buttonY);
+    // Calculate button positions based on input field dimensions
+    int buttonX1 = inputFieldX + inputFieldWidth / 4 - BUTTON_WIDTH / 2;
+    int buttonX2 = inputFieldX + inputFieldWidth * 3 / 4 - BUTTON_WIDTH / 2;
+
+    // Draw buttons centered horizontally relative to the input field
+    renderButton(renderer, buttonText.c_str(), buttonX1, buttonY);
+    renderButton(renderer, "Close Window", buttonX2, buttonY);
 
     // Render the text input buffer if any
     renderText(textInputBuffer, 55, 145, 24); // Adjust text position
 
     SDL_RenderPresent(renderer);
 }
+
+
 
 bool SDLApp::shouldQuit() const {
     return quit;

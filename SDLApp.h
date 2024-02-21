@@ -45,7 +45,7 @@ private:
     void render();
     void renderText(const std::string& message, int x, int y, int fontSize);
     void renderButton(SDL_Renderer* renderer, const char* text, int x, int y);
-    bool isMouseInsideButton(int mouseX, int mouseY, int buttonX, int buttonY);
+    bool isMouseInsideButton(int mouseX, int mouseY, int buttonX, int buttonY, int buttonWidth, int buttonHeight);
     void handleButtonClick(SDL_Event& event);
     void handleTextInput(SDL_Event& event);
 };
