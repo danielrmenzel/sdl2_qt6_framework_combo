@@ -2,6 +2,8 @@
 
 #include "SDLApp.h"
 #include <QDebug>
+#include <iostream>
+#include <unistd.h>
 
 SDLApp::SDLApp(QObject *parent) : QObject(parent), window(nullptr), renderer(nullptr), drawLineFlag(false), quit(false), textInputMode(false), textInputBuffer(""), font(nullptr) {
     if (!init()) {
@@ -36,8 +38,15 @@ bool SDLApp::init() {
         qDebug() << "SDL_CreateRenderer Error:" << SDL_GetError();
         return false;
     }
+    char cwd[1024];
+    if (getcwd(cwd, sizeof(cwd)) != NULL) {
+        std::cout << "Current working dir: " << cwd << std::endl;
+    } else {
+        perror("getcwd() error");
+    }
 
-    font = TTF_OpenFont("/home/dan/old/assets/pacifico/Pacifico.ttf", 24);
+    std::string fontPath = std::string(PROJECT_ROOT_PATH) + "assets/pacifico/Pacifico.ttf";
+    font = TTF_OpenFont(fontPath.c_str(), 24);
     if (!font) {
         qDebug() << "Failed to load font:" << TTF_GetError();
         return false;
