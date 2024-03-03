@@ -3,6 +3,7 @@
 #include <QPushButton>
 #include <QMessageBox>
 #include <QTimer>
+#include <QLineEdit> // Include for QLineEdit
 
 MainWindow::MainWindow(SDLApp *sdlApp, QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow), sdlApp(sdlApp)
@@ -22,6 +23,19 @@ MainWindow::MainWindow(SDLApp *sdlApp, QWidget *parent)
     sdlTimer = new QTimer(this);
     connect(sdlTimer, &QTimer::timeout, sdlApp, &SDLApp::processEvents);
     sdlTimer->start(16); // Run approximately every 60Hz (16ms)
+
+    // Add QLineEdit for text input
+    QLineEdit *textInputField = new QLineEdit(this);
+    textInputField->setGeometry(120, 10, 200, 30); // Adjust geometry as needed
+
+    // Add QPushButton for submission
+    QPushButton *submitButton = new QPushButton("Submit", this);
+    submitButton->setGeometry(330, 10, 100, 30); // Adjust geometry as needed
+
+    connect(submitButton, &QPushButton::clicked, [this, textInputField, sdlApp]() {
+        sdlApp->submitText(textInputField->text().toStdString());
+    });
+
 }
 
 MainWindow::~MainWindow()

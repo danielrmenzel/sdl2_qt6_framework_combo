@@ -16,6 +16,7 @@ public:
     bool init();
     void processEvents();
     void toggleLine();
+    void submitText(const std::string &text); // Method to receive and handle submitted text
     bool shouldQuit() const;
     void cleanUp();
 
@@ -29,8 +30,9 @@ private:
     SDL_Texture* imageTexture; // Member variable to hold the image texture
     bool drawLineFlag;
     bool quit;
-    std::string buttonText; // Added member variable
+    std::string buttonText; // Existing member variable
 
+    // UI dimensions for buttons
     static constexpr int BUTTON_WIDTH = 200;
     static constexpr int BUTTON_HEIGHT = 50;
     int buttonX = 220;
@@ -42,6 +44,9 @@ private:
     TTF_Font* font;
     SDL_Color textColor;
 
+    std::string submittedText; // Store the text submitted from the Qt window
+
+    // Rendering methods
     void render();
     void renderText(const std::string& message, int x, int y, int fontSize);
     void renderButton(SDL_Renderer* renderer, const char* text, int x, int y);

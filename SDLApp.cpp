@@ -1,7 +1,22 @@
 #include "SDLApp.h"
 #include <QDebug>
 #include <iostream>
+
+
 #include <unistd.h>
+
+// Add these to your SDLApp class definition
+static constexpr int SQUARE_WIDTH = 540;
+static constexpr int SQUARE_HEIGHT = 50;
+int squareX = 50; // X position of the square's top-left corner
+int squareY = 140;  // Y position of the square's top-left corner
+
+// int inputFieldX = 50;
+// int inputFieldY = 140;
+// int inputFieldWidth = 540;
+// int inputFieldHeight = 50;
+
+
 
 SDLApp::SDLApp(QObject *parent) : QObject(parent), window(nullptr), renderer(nullptr), drawLineFlag(false), quit(false), textInputMode(false), textInputBuffer(""), font(nullptr), buttonText("Enter Text") {
     if (!init()) {
@@ -54,8 +69,8 @@ bool SDLApp::init() {
         qDebug() << "Failed to load font:" << TTF_GetError();
         return false;
     }
-
-    textColor = {64, 64, 64, 255}; // RGB values for dark grey, 255 for full opacity
+    //64 64 64 for grey
+    textColor = {255, 105, 180, 255}; // RGB values for dark grey, 255 for full opacity
 
     std::string imagePath = std::string(PROJECT_ROOT_PATH) + "assets/images/banner.jpg";
     qDebug() << "img path: " + imagePath;
@@ -68,6 +83,10 @@ bool SDLApp::init() {
 
     qDebug() << "SDLApp initialized successfully.";
     return true;
+}
+void SDLApp::submitText(const std::string &text) {
+    this->submittedText = text;
+    render();
 }
 
 void SDLApp::processEvents() {
@@ -91,13 +110,30 @@ void SDLApp::processEvents() {
             }
             break;
         case SDL_MOUSEBUTTONDOWN:
-            handleButtonClick(e);
-            break;
+        {
+            int mouseX, mouseY;
+            SDL_GetMouseState(&mouseX, &mouseY);
+
+            // Check for click within the designated square
+            if (mouseX >= squareX && mouseX <= squareX + SQUARE_WIDTH &&
+                mouseY >= squareY && mouseY <= squareY + SQUARE_HEIGHT) {
+                // Toggle text input mode or any other desired action
+                qDebug("Mouse click in designated text input area detected.");
+                textInputMode = !textInputMode;
+                if (textInputMode) SDL_StartTextInput();
+                else SDL_StopTextInput();
+            } else {
+                // Handle other button clicks if not within square
+                handleButtonClick(e);
+            }
+        }
+        break;
         default:
             break;
         }
     }
 }
+
 
 void SDLApp::toggleLine() {
     qDebug() << "Toggle line called.";
@@ -201,6 +237,11 @@ void SDLApp::handleTextInput(SDL_Event& event) {
 void SDLApp::render() {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // Background color
     SDL_RenderClear(renderer);
+    // Render the submitted text in pink
+    if (!submittedText.empty()) {
+        renderText(submittedText, 50, 400, 24); // Example position and size
+    }
+
 
     int imgWidth, imgHeight;
     SDL_QueryTexture(imageTexture, NULL, NULL, &imgWidth, &imgHeight);
