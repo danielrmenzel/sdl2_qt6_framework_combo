@@ -18,10 +18,12 @@ public:
     void toggleLine();
     void submitText(const std::string &text); // Method to receive and handle submitted text
     bool shouldQuit() const;
+    void openOrToggleWindow();
+    void closeWindow();
     void cleanUp();
 
 signals:
-    void textEntered(const QString& text); // Signal to notify when text is entered
+    void textEntered(const QString& text);
     void quitApplication();
 
 private:

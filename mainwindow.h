@@ -13,13 +13,17 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
+public slots:
+    void onTextEntered(const QString& text);
+
 public:
     MainWindow(SDLApp *sdlApp, QWidget *parent = nullptr);
     ~MainWindow();
 
+
 private slots:
     void onToggleLineButtonClicked();
-    void onTextEntered(const QString& text); // Slot to handle text submission
+    //void onTextEntered(const QString& text); // Slot to handle text submission
 
 private:
     Ui::MainWindow *ui;

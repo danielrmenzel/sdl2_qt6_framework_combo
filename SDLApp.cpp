@@ -19,10 +19,33 @@ int squareY = 140;  // Y position of the square's top-left corner
 
 
 SDLApp::SDLApp(QObject *parent) : QObject(parent), window(nullptr), renderer(nullptr), drawLineFlag(false), quit(false), textInputMode(false), textInputBuffer(""), font(nullptr), buttonText("Enter Text") {
-    if (!init()) {
-        qDebug() << "Failed to initialize SDLApp.";
+    // Removed the automatic call to init().
+}
+
+
+void SDLApp::openOrToggleWindow() {
+    if (window == nullptr) {
+        // Only initialize if the SDL window has not been created yet.
+        if (!init()) {
+            qDebug() << "Failed to initialize SDLApp.";
+        } else {
+            render(); // Render initial content after successful initialization.
+        }
+    } else {
+        // If the window already exists, toggle its visibility or close it as desired.
+        // For example, to simply close and clean up:
+        cleanUp();
+        // If you intend to toggle visibility instead, you'd adjust this logic.
     }
 }
+
+
+
+void SDLApp::closeWindow() {
+    cleanUp(); // This will destroy the window, renderer, and other SDL resources.
+    //emit quitApplication(); // If you want to signal the application to quit.
+}
+
 
 SDLApp::~SDLApp() {
     cleanUp();
@@ -86,8 +109,13 @@ bool SDLApp::init() {
 }
 void SDLApp::submitText(const std::string &text) {
     this->submittedText = text;
+    qDebug() << "Emitting textEntered signal with text:" << QString::fromStdString(text);
     render();
+    //emit textEntered(QString::fromStdString(text));
+
 }
+
+
 
 void SDLApp::processEvents() {
     SDL_Event e;
