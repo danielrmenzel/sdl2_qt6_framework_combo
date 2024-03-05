@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include "SDLApp.h"
 #include <QLabel> // Include QLabel
+#include <QLineEdit>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -30,6 +31,7 @@ private:
     SDLApp *sdlApp;
     QTimer *sdlTimer;
     QLabel *displayTextLabel; // Add QLabel member variable
+    QLineEdit *textInputField; // Add this line for the text input field
 
 protected:
     void closeEvent(QCloseEvent *event) override;

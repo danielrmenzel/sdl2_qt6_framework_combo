@@ -1,47 +1,80 @@
+// mainwindow.cpp
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 #include <QPushButton>
 #include <QMessageBox>
 #include <QTimer>
 #include <QLineEdit>
-#include <QDebug> // Include for qDebug()
+#include <QDebug>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QFrame> // For QFrame
+#include <QLabel> // For QLabel
+
 
 MainWindow::MainWindow(SDLApp *sdlApp, QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow), sdlApp(sdlApp) {
     ui->setupUi(this);
 
-    QPushButton *toggleSDLWindowButton = new QPushButton("Open/Toggle SDL Window", this);
-    toggleSDLWindowButton->setGeometry(10, 10, 200, 30);
+    // Main vertical layout for the central widget
+    QVBoxLayout *mainLayout = new QVBoxLayout(ui->centralwidget);
+
+    // Toggle SDL Window Button
+    QPushButton *toggleSDLWindowButton = new QPushButton("Open/Close SDL Window");
+    toggleSDLWindowButton->setStyleSheet("QPushButton { background-color: blue; color: white; }"); // Blue background, white text
+    mainLayout->addWidget(toggleSDLWindowButton);
     connect(toggleSDLWindowButton, &QPushButton::clicked, this, &MainWindow::onToggleLineButtonClicked);
 
-    displayTextLabel = new QLabel(this);
-    displayTextLabel->setGeometry(120, 50, 400, 30);
+    // Frame to hold the label and display text with an outline
+    QFrame *messageFrame = new QFrame();
+    messageFrame->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+    messageFrame->setLineWidth(1);
 
+    QHBoxLayout *messageLayout = new QHBoxLayout(messageFrame);
+    QLabel *messageLabel = new QLabel("Message from SDL Window:");
+    messageLabel->setStyleSheet("QLabel { color : grey; }");
+    messageLayout->addWidget(messageLabel);
+
+    displayTextLabel = new QLabel();
+    displayTextLabel->setMinimumSize(200, 30);
+    messageLayout->addWidget(displayTextLabel);
+    mainLayout->addWidget(messageFrame);
+
+    // New section: Horizontal layout for the new label and text input field
+    QHBoxLayout *textInputLayout = new QHBoxLayout();
+    QLabel *textInputLabel = new QLabel("Enter message for SDL2 Window:");
+    textInputField = new QLineEdit();
+    textInputField->setMinimumSize(150, 30);
+
+    textInputLayout->addWidget(textInputLabel);
+    textInputLayout->addWidget(textInputField);
+    mainLayout->addLayout(textInputLayout);
+
+    // Submit Button
+    QPushButton *submitButton = new QPushButton("Submit");
+    submitButton->setStyleSheet("QPushButton { background-color: blue; color: white; }"); // Blue background, white text
+
+    mainLayout->addWidget(submitButton);
+    connect(submitButton, &QPushButton::clicked, [this, sdlApp]() {
+        sdlApp->submitText(this->textInputField->text().toStdString());
+    });
+
+
+    // SDL Timer setup
     sdlTimer = new QTimer(this);
     connect(sdlTimer, &QTimer::timeout, sdlApp, &SDLApp::processEvents);
     sdlTimer->start(16); // Run approximately every 60Hz (16ms)
 
-    QPushButton *closeSDLButton = new QPushButton("Close SDLApp", this);
-    closeSDLButton->setGeometry(220, 10, 200, 30);
-    connect(closeSDLButton, &QPushButton::clicked, sdlApp, &SDLApp::closeWindow);
-
-    QLineEdit *textInputField = new QLineEdit(this);
-    textInputField->setGeometry(120, 90, 200, 30);
-
-    QPushButton *submitButton = new QPushButton("Submit", this);
-    submitButton->setGeometry(330, 90, 100, 30);
-    connect(submitButton, &QPushButton::clicked, [this, textInputField, sdlApp]() {
-        sdlApp->submitText(textInputField->text().toStdString());
-    });
-
-    // Connecting SDLApp's textEntered signal to MainWindow's onTextEntered slot
-    // and confirming the connection.
+    // Connection for SDLApp's textEntered signal
     bool isConnected = connect(sdlApp, &SDLApp::textEntered, this, &MainWindow::onTextEntered);
     if (isConnected) {
         qDebug() << "Successfully connected SDLApp textEntered signal to MainWindow slot.";
     } else {
         qDebug() << "Failed to connect SDLApp textEntered signal to MainWindow slot.";
     }
+
+    // Adjust the window size as needed
+    this->setGeometry(100, 100, 200, 100);
 }
 
 MainWindow::~MainWindow() {

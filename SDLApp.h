@@ -14,12 +14,17 @@ public:
     ~SDLApp();
 
     bool init();
+    bool initResources();
+    bool initTextAndImages();
     void processEvents();
-    void toggleLine();
+    void toggleSDLWindow();
+    SDL_Texture* createTextTexture(const std::string& message, int& textWidth, int& textHeight);
+
     void submitText(const std::string &text); // Method to receive and handle submitted text
     bool shouldQuit() const;
     void openOrToggleWindow();
     void closeWindow();
+    void cleanUpSDLWindow();
     void cleanUp();
 
 signals:
@@ -31,7 +36,7 @@ private:
     SDL_Renderer* renderer;
     SDL_Texture* imageTexture; // Member variable to hold the image texture
     bool drawLineFlag;
-    bool quit;
+    bool closeWindowBtnClickedSDL;
     std::string buttonText; // Existing member variable
 
     // UI dimensions for buttons
@@ -43,6 +48,9 @@ private:
     bool textInputMode;
     std::string textInputBuffer;
 
+
+
+
     TTF_Font* font;
     SDL_Color textColor;
 
@@ -50,7 +58,7 @@ private:
 
     // Rendering methods
     void render();
-    void renderText(const std::string& message, int x, int y, int fontSize);
+    void renderMessageFromMainwindow(const std::string& message, int x, int y, int fontSize);
     void renderButton(SDL_Renderer* renderer, const char* text, int x, int y);
     bool isMouseInsideButton(int mouseX, int mouseY, int buttonX, int buttonY, int buttonWidth, int buttonHeight);
     void handleButtonClick(SDL_Event& event);
