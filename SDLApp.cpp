@@ -44,7 +44,7 @@ void SDLApp::openOrToggleWindow() {
             render();
         }
     } else {
-        cleanUp();      // close SDL2 window if it already exists
+        cleanUp();      // closes SDL2 window if it already exists
     }
 }
 

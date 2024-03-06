@@ -11,17 +11,23 @@
 #include <QFrame> // For QFrame
 #include <QLabel> // For QLabel
 
-
-MainWindow::MainWindow(SDLApp *sdlApp, QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow), sdlApp(sdlApp) {
-    ui->setupUi(this);
+/*
+ * Constructor for MainWindow
+ * @param sdlApp - Pointer to SDLApp object to control SDL window
+ * @param parent - Pointer to parent widget
+*/
+MainWindow::MainWindow(SDLApp *sdlApp, QWidget *parent):
+    QMainWindow(parent),    // Initialize QMainWindow with parent widget
+    ui(new Ui::MainWindow), // Initialize QTDesigner UI setup
+    sdlApp(sdlApp) {
+    ui->setupUi(this);      // Setup UI components for this window
 
     // Main vertical layout for the central widget
     QVBoxLayout *mainLayout = new QVBoxLayout(ui->centralwidget);
 
     // Toggle SDL Window Button
     QPushButton *toggleSDLWindowButton = new QPushButton("Open/Close SDL Window");
-    toggleSDLWindowButton->setStyleSheet("QPushButton { background-color: blue; color: white; }"); // Blue background, white text
+    toggleSDLWindowButton->setStyleSheet("QPushButton { background-color: blue; color: white; }");
     mainLayout->addWidget(toggleSDLWindowButton);
     connect(toggleSDLWindowButton, &QPushButton::clicked, this, &MainWindow::onToggleLineButtonClicked);
 
@@ -76,19 +82,33 @@ MainWindow::MainWindow(SDLApp *sdlApp, QWidget *parent)
     // Adjust the window size as needed
     this->setGeometry(100, 100, 200, 100);
 }
-
+/*
+ * Deconstructor for MainWindow
+*/
 MainWindow::~MainWindow() {
     delete ui;
 }
 
+
+/*
+ * Handles click event of toggle button (open/close)
+*/
 void MainWindow::onToggleLineButtonClicked() {
     sdlApp->openOrToggleWindow();
 }
 
+
+/*
+ * Updates main window's display with submitted text from SDL2 window
+ * @param text - Text from SDL2 window
+*/
 void MainWindow::onTextEntered(const QString& text) {
     displayTextLabel->setText(text);
 }
 
+/*
+ * Handles window close event, releases SDL resources
+*/
 void MainWindow::closeEvent(QCloseEvent *event) {
     sdlApp->cleanUp();
     QMainWindow::closeEvent(event);

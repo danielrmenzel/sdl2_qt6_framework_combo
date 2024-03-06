@@ -20,7 +20,7 @@ public:
     void toggleSDLWindow();
     SDL_Texture* createTextTexture(const std::string& message, int& textWidth, int& textHeight);
 
-    void submitText(const std::string &text); // Method to receive and handle submitted text
+    void submitText(const std::string &text);
     bool shouldQuit() const;
     void openOrToggleWindow();
     void closeWindow();
@@ -34,10 +34,10 @@ signals:
 private:
     SDL_Window* window;
     SDL_Renderer* renderer;
-    SDL_Texture* imageTexture; // Member variable to hold the image texture
+    SDL_Texture* imageTexture;
     bool drawLineFlag;
     bool closeWindowBtnClickedSDL;
-    std::string buttonText; // Existing member variable
+    std::string buttonText;
 
     // UI dimensions for buttons
     static constexpr int BUTTON_WIDTH = 200;
@@ -54,7 +54,7 @@ private:
     TTF_Font* font;
     SDL_Color textColor;
 
-    std::string submittedText; // Store the text submitted from the Qt window
+    std::string submittedText;
 
     // Rendering methods
     void render();

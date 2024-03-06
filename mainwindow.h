@@ -24,14 +24,13 @@ public:
 
 private slots:
     void onToggleLineButtonClicked();
-    //void onTextEntered(const QString& text); // Slot to handle text submission
 
 private:
     Ui::MainWindow *ui;
     SDLApp *sdlApp;
     QTimer *sdlTimer;
-    QLabel *displayTextLabel; // Add QLabel member variable
-    QLineEdit *textInputField; // Add this line for the text input field
+    QLabel *displayTextLabel;
+    QLineEdit *textInputField;
 
 protected:
     void closeEvent(QCloseEvent *event) override;
