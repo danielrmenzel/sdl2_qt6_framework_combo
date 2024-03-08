@@ -1,14 +1,17 @@
 # Qt and SDL Integration Project
 
 This project demonstrates the integration of the Qt framework with the Simple DirectMedia Layer (SDL) library to create a GUI application that leverages SDL's functionalities for rendering and handling multimedia.
+![sdl2_v2_windows](https://github.com/danielrmenzel/sdl2_v2/assets/109724990/66f02ab6-b41f-4f0b-b8c9-87849593e2a1)
+
+
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
+These instructions will show you how to get a copy of the project up and running.
 
 ### Prerequisites
 
-- Qt (Ensure you have Qt Creator installed for ease of use)
+- Qt6 (Ensure you have Qt Creator installed for ease of use)
 - SDL2, SDL2_image, and SDL2_ttf libraries
 - CMake (for building the application)
 
