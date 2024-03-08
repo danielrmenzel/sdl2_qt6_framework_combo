@@ -8,8 +8,8 @@
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
-#include <QFrame> // For QFrame
-#include <QLabel> // For QLabel
+#include <QFrame>
+#include <QLabel>
 
 /*
  * Constructor for MainWindow
