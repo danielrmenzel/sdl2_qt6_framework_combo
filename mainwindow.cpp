@@ -19,7 +19,7 @@
 MainWindow::MainWindow(SDLApp *sdlApp, QWidget *parent):
     QMainWindow(parent),    // Initialize QMainWindow with parent widget
     ui(new Ui::MainWindow), // Initialize QTDesigner UI setup
-    sdlApp(sdlApp) {
+    sdlApp(sdlApp) {        // Store pointer to SDLApp instance for later use
     ui->setupUi(this);      // Setup UI components for this window
 
     // Main vertical layout for the central widget
