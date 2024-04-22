@@ -3,6 +3,8 @@
 #include <QDebug>
 #include <iostream>
 #include <unistd.h>
+#include <QCoreApplication> // Include QCoreApplication for platform detection
+#include <QDir>
 
 // Constants for text input field size and position within SDL2 Window
 static constexpr int SQUARE_WIDTH = 540;
@@ -104,9 +106,25 @@ bool SDLApp::init() {
 /*
  * Initializes SDL2 text and image capabilities
 */
+
 bool SDLApp::initTextAndImages() {
-    std::string imagePath = std::string(PROJECT_ROOT_PATH) + "assets/images/banner.jpg";
-    qDebug() << "img path: " + imagePath;
+    QString projectRootPath = QCoreApplication::applicationDirPath();  // Get current directory path
+    QDir dir(projectRootPath);  // Create a QDir object with the current directory path
+    dir.cdUp();  // Move up one directory
+    dir.cdUp();  // Move up another directory
+
+    projectRootPath = dir.absolutePath() + "/";  // Get the absolute path of the new directory
+
+    // Define PROJECT_ROOT_PATH based on platform
+#ifdef Q_OS_WIN
+    //projectRootPath = QCoreApplication::applicationDirPath() + "/";
+    //qDebug() << "projectRootPath windows: " << projectRootPath;
+#else
+    //projectRootPath = QCoreApplication::applicationDirPath().section("/", 0, -4) + "/";
+#endif
+
+    std::string imagePath = projectRootPath.toStdString() + "assets/images/banner.jpg";
+    qDebug() << "img path: " + QString::fromStdString(imagePath);
 
     imageTexture = IMG_LoadTexture(renderer, imagePath.c_str());
     if (!imageTexture) {
@@ -114,7 +132,7 @@ bool SDLApp::initTextAndImages() {
         return false;
     }
 
-    std::string fontPath = std::string(PROJECT_ROOT_PATH) + "assets/fonts/alagard.ttf";
+    std::string fontPath = projectRootPath.toStdString() + "assets/fonts/alagard.ttf";
     font = TTF_OpenFont(fontPath.c_str(), 24);
     if (!font) {
         qDebug() << "Failed to load font:" << TTF_GetError();
@@ -122,7 +140,6 @@ bool SDLApp::initTextAndImages() {
     }
     textColor = {64, 64, 64, 255};
     return true;
-
 }
 /*
  * Submitted text entered in QT Window
