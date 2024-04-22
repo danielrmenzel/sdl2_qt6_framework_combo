@@ -1,5 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+#define SDL_MAIN_HANDLED  // Define this before including SDL headers
+
 
 #include <QMainWindow>
 #include "SDLApp.h"
