@@ -12,7 +12,6 @@
 
 #endif
 
-
 int main(int argc, char *argv[])
 {
 #ifdef Q_OS_WIN
@@ -22,7 +21,6 @@ int main(int argc, char *argv[])
     ShowWindow(hwnd, SW_HIDE);
 
 #endif
-
 
     QApplication app(argc, argv); // CreateQApplication
 

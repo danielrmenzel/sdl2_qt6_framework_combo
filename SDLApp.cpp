@@ -207,14 +207,14 @@ void SDLApp::processEvents()
                 qDebug("Mouse click in designated text input area detected.");
                 textInputMode = true;
                 render();
-                if (textInputMode){
+                if (textInputMode) {
                     qDebug("Entering SDL_StartTextInput()");
                     SDL_StartTextInput();
-                }
-                else{
+                } else {
                     qDebug("Exiting SDL_StartTextInput()");
 
-                    SDL_StopTextInput();}
+                    SDL_StopTextInput();
+                }
             } else {
                 handleButtonClick(e);
             }
