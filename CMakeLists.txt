@@ -51,7 +51,10 @@ elseif(WIN32)
     set(SDL2TTF_INCLUDE_DIRS "C:/Users/danie/OneDrive/Desktop/bachelor/local_project_files/SDL2_ttf-2.22.0/include")
     set(SDL2TTF_LIBRARIES "C:/Users/danie/OneDrive/Desktop/bachelor/local_project_files/SDL2_ttf-2.22.0/lib/x64/SDL2_ttf.lib")
 
-else() # Assume Linux
+
+else() # Assuming Linux or other platforms
+    # Set paths for SDL2, SDL2_image, and SDL2_ttf on other platforms
+    # You can adjust these paths according to your setup
     set(SDL2_INCLUDE_DIRS "/usr/include/SDL2")
     set(SDL2_LIBRARIES "-lSDL2")
 
