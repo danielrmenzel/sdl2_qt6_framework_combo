@@ -5,8 +5,9 @@
 #include <SDL.h>
 
 #ifdef Q_OS_WIN
-//#include "C:/Users/danie/OneDrive/Desktop/bachelor/local_project_files/SDL2_ttf-2.22.0/include/SDL_ttf.h"
-//#include "C:/Users/danie/OneDrive/Desktop/bachelor/local_project_files/SDL2_image-2.8.2/include/SDL_image.h"
+#include "C:/Users/danie/OneDrive/Desktop/bachelor/local_project_files/SDL2_ttf-2.22.0/include/SDL_ttf.h"
+#include "C:/Users/danie/OneDrive/Desktop/bachelor/local_project_files/SDL2_image-2.8.2/include/SDL_image.h"
+
 
 
 #else

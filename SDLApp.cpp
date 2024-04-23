@@ -121,7 +121,7 @@ bool SDLApp::initTextAndImages()
 
     projectRootPath = dir.absolutePath() + "/"; // Get the absolute path of the new directory
 
-    // Define PROJECT_ROOT_PATH based on platform
+// Define PROJECT_ROOT_PATH based on platform
 #ifdef Q_OS_WIN
     //projectRootPath = QCoreApplication::applicationDirPath() + "/";
     //qDebug() << "projectRootPath windows: " << projectRootPath;
