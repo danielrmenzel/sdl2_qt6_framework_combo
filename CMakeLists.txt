@@ -4,8 +4,7 @@ project(test3 VERSION 0.1 LANGUAGES CXX)
 
 set(PROJECT_ROOT_PATH "${CMAKE_SOURCE_DIR}/")
 
-#configure_file(config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
-
+# Configure Qt
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -18,16 +17,31 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 set(PROJECT_SOURCES
-        main.cpp
-        mainwindow.cpp
-        mainwindow.h
-        mainwindow.ui
-        SDLApp.cpp
-        SDLApp.h
+    main.cpp
+    mainwindow.cpp
+    mainwindow.h
+    mainwindow.ui
+    SDLApp.cpp
+    SDLApp.h
 )
 
-# Find and include SDL2 on both Linux and Windows
-if(WIN32)
+# Find and include SDL2, SDL2_image, and SDL2_ttf on different platforms
+if(APPLE)
+    find_library(SDL2_FRAMEWORK SDL2 REQUIRED)
+    find_library(SDL2IMAGE_FRAMEWORK SDL2_image REQUIRED)
+    find_library(SDL2TTF_LIBRARIES SDL2_ttf REQUIRED)
+
+    # Include directories for SDL2, SDL2_image, and SDL2_ttf
+    set(SDL2_INCLUDE_DIRS "/usr/local/include/SDL2")
+    set(SDL2IMAGE_INCLUDE_DIRS "/usr/local/include/SDL2")
+    set(SDL2TTF_INCLUDE_DIRS "/usr/local/include/SDL2")
+
+    # Link against SDL2, SDL2_image, and SDL2_ttf frameworks
+    set(SDL2_LIBRARIES ${SDL2_FRAMEWORK})
+    set(SDL2IMAGE_LIBRARIES ${SDL2IMAGE_FRAMEWORK})
+    set(SDL2TTF_LIBRARIES ${SDL2TTF_LIBRARIES})
+
+elseif(WIN32)
     set(SDL2_INCLUDE_DIRS "C:/Users/danie/OneDrive/Desktop/bachelor/local_project_files/SDL2-2.30.2_test/include")
     set(SDL2_LIBRARIES "C:/Users/danie/OneDrive/Desktop/bachelor/local_project_files/SDL2-2.30.2_test/lib/x64/SDL2.lib")
 
@@ -37,8 +51,7 @@ if(WIN32)
     set(SDL2TTF_INCLUDE_DIRS "C:/Users/danie/OneDrive/Desktop/bachelor/local_project_files/SDL2_ttf-2.22.0/include")
     set(SDL2TTF_LIBRARIES "C:/Users/danie/OneDrive/Desktop/bachelor/local_project_files/SDL2_ttf-2.22.0/lib/x64/SDL2_ttf.lib")
 
-    #set(PROJECT_ROOT_PATH "C:/path/to/your/project/root/")
-else() # Assuming Linux
+else() # Assume Linux
     set(SDL2_INCLUDE_DIRS "/usr/include/SDL2")
     set(SDL2_LIBRARIES "-lSDL2")
 

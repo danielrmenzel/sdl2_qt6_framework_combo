@@ -1,15 +1,16 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
-#define SDL_MAIN_HANDLED  // Define this before including SDL headers
+#define SDL_MAIN_HANDLED // Define this before including SDL headers
 
-
-#include <QMainWindow>
-#include "SDLApp.h"
 #include <QLabel> // Include QLabel
 #include <QLineEdit>
+#include <QMainWindow>
+#include "SDLApp.h"
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
+namespace Ui {
+class MainWindow;
+}
 QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
@@ -17,12 +18,11 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public slots:
-    void onTextEntered(const QString& text);
+    void onTextEntered(const QString &text);
 
 public:
     MainWindow(SDLApp *sdlApp, QWidget *parent = nullptr);
     ~MainWindow();
-
 
 private slots:
     void onToggleLineButtonClicked();

@@ -1,26 +1,29 @@
 // mainwindow.cpp
 #include "mainwindow.h"
-#include "./ui_mainwindow.h"
-#include <QPushButton>
-#include <QMessageBox>
-#include <QTimer>
-#include <QLineEdit>
 #include <QDebug>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
 #include <QFrame>
+#include <QHBoxLayout>
 #include <QLabel>
+#include <QLineEdit>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QTimer>
+#include <QVBoxLayout>
+#include "./ui_mainwindow.h"
 
 /*
  * Constructor for MainWindow
  * @param sdlApp - Pointer to SDLApp object to control SDL window
  * @param parent - Pointer to parent widget
 */
-MainWindow::MainWindow(SDLApp *sdlApp, QWidget *parent):
-    QMainWindow(parent),    // Initialize QMainWindow with parent widget
-    ui(new Ui::MainWindow), // Initialize QTDesigner UI setup
-    sdlApp(sdlApp) {        // Store pointer to SDLApp instance for later use
-    ui->setupUi(this);      // Setup UI components for this window
+MainWindow::MainWindow(SDLApp *sdlApp, QWidget *parent)
+    : QMainWindow(parent)
+    , // Initialize QMainWindow with parent widget
+    ui(new Ui::MainWindow)
+    , // Initialize QTDesigner UI setup
+    sdlApp(sdlApp)
+{                      // Store pointer to SDLApp instance for later use
+    ui->setupUi(this); // Setup UI components for this window
 
     // Main vertical layout for the central widget
     QVBoxLayout *mainLayout = new QVBoxLayout(ui->centralwidget);
@@ -29,7 +32,10 @@ MainWindow::MainWindow(SDLApp *sdlApp, QWidget *parent):
     QPushButton *toggleSDLWindowButton = new QPushButton("Open/Close SDL Window");
     toggleSDLWindowButton->setStyleSheet("QPushButton { background-color: blue; color: white; }");
     mainLayout->addWidget(toggleSDLWindowButton);
-    connect(toggleSDLWindowButton, &QPushButton::clicked, this, &MainWindow::onToggleLineButtonClicked);
+    connect(toggleSDLWindowButton,
+            &QPushButton::clicked,
+            this,
+            &MainWindow::onToggleLineButtonClicked);
 
     // Frame to hold the label and display text with an outline
     QFrame *messageFrame = new QFrame();
@@ -58,13 +64,13 @@ MainWindow::MainWindow(SDLApp *sdlApp, QWidget *parent):
 
     // Submit Button
     QPushButton *submitButton = new QPushButton("Submit");
-    submitButton->setStyleSheet("QPushButton { background-color: blue; color: white; }"); // Blue background, white text
+    submitButton->setStyleSheet(
+        "QPushButton { background-color: blue; color: white; }"); // Blue background, white text
 
     mainLayout->addWidget(submitButton);
     connect(submitButton, &QPushButton::clicked, [this, sdlApp]() {
         sdlApp->submitText(this->textInputField->text().toStdString());
     });
-
 
     // SDL Timer setup
     sdlTimer = new QTimer(this);
@@ -85,31 +91,33 @@ MainWindow::MainWindow(SDLApp *sdlApp, QWidget *parent):
 /*
  * Deconstructor for MainWindow
 */
-MainWindow::~MainWindow() {
+MainWindow::~MainWindow()
+{
     delete ui;
 }
-
 
 /*
  * Handles click event of toggle button (open/close)
 */
-void MainWindow::onToggleLineButtonClicked() {
+void MainWindow::onToggleLineButtonClicked()
+{
     sdlApp->openOrToggleWindow();
 }
-
 
 /*
  * Updates main window's display with submitted text from SDL2 window
  * @param text - Text from SDL2 window
 */
-void MainWindow::onTextEntered(const QString& text) {
+void MainWindow::onTextEntered(const QString &text)
+{
     displayTextLabel->setText(text);
 }
 
 /*
  * Handles window close event, releases SDL resources
 */
-void MainWindow::closeEvent(QCloseEvent *event) {
+void MainWindow::closeEvent(QCloseEvent *event)
+{
     sdlApp->cleanUp();
     QMainWindow::closeEvent(event);
 }
