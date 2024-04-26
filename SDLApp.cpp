@@ -3,8 +3,8 @@
 #include <QCoreApplication> // Include QCoreApplication for platform detection
 #include <QDebug>
 #include <QDir>
-#include <iostream>
 #include <filesystem>
+#include <iostream>
 #include <unistd.h>
 
 // Constants for text input field size and position within SDL2 Window
@@ -112,46 +112,19 @@ bool SDLApp::init()
 /*
  * Initializes SDL2 text and image capabilities
 */
-
 bool SDLApp::initTextAndImages()
 {
-    QString projectRootPath = QCoreApplication::applicationDirPath(); // Get current directory path
-    qDebug() << "project root path before moving up in hierarchy" << projectRootPath;
-    std::filesystem::path currentDir = std::filesystem::current_path();
-    qDebug() << "currentDir:" << currentDir;
     std::string fullPath(__FILE__);
     std::filesystem::path pathObj(fullPath);
     std::filesystem::path dirPath = pathObj.parent_path();
 
     std::cout << "Directory of main.cpp: " << dirPath << std::endl;
 
-
-
-    QDir dir(projectRootPath); // Create a QDir object with the current directory path
-    dir.cdUp();                // Move up one directory
-    dir.cdUp();                // Move up another directory
-
-    projectRootPath = dir.absolutePath() + "/"; // Get the absolute path of the new directory
-
-// Define PROJECT_ROOT_PATH based on platform
     std::string imagePath;
     std::string fontPath;
 
-#ifdef Q_OS_WIN
-    //projectRootPath = QCoreApplication::applicationDirPath() + "/";
-    //qDebug() << "projectRootPath windows: " << projectRootPath;
-    imagePath = projectRootPath.toStdString() + "assets/images/banner.jpg";
-    fontPath = projectRootPath.toStdString() + "assets/fonts/alagard.ttf";
-
-
-#else
     imagePath = dirPath.string() + "/assets/images/banner.jpg";
     fontPath = dirPath.string() + "/assets/fonts/alagard.ttf";
-    //projectRootPath = QCoreApplication::applicationDirPath().section("/", 0, -4) + "/";
-
-#endif
-    qDebug() << "project root path" << projectRootPath;
-    qDebug() << "img path: " + QString::fromStdString(imagePath);
 
     imageTexture = IMG_LoadTexture(renderer, imagePath.c_str());
     if (!imageTexture) {
