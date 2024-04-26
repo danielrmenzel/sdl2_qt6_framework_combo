@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(test3 VERSION 0.1 LANGUAGES CXX)
+project(thesis_project VERSION 0.1 LANGUAGES CXX)
 
 set(PROJECT_ROOT_PATH "${CMAKE_SOURCE_DIR}/")
 
@@ -56,7 +56,7 @@ else() # Assuming Linux or other platforms
 endif()
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(test3
+    qt_add_executable(thesis_project
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
         SDLApp.h
@@ -64,18 +64,18 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     )
 else()
     if(ANDROID)
-        add_library(test3 SHARED
+        add_library(thesis_project SHARED
             ${PROJECT_SOURCES}
         )
     else()
-        add_executable(test3
+        add_executable(thesis_project
             ${PROJECT_SOURCES}
         )
     endif()
 endif()
 
 # Include directories for your project
-target_include_directories(test3 PRIVATE
+target_include_directories(thesis_project PRIVATE
     ${SDL2_INCLUDE_DIRS}
     ${SDL2IMAGE_INCLUDE_DIRS}
     ${SDL2TTF_INCLUDE_DIRS}
@@ -83,7 +83,7 @@ target_include_directories(test3 PRIVATE
 )
 
 # Link libraries
-target_link_libraries(test3 PRIVATE
+target_link_libraries(thesis_project PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     ${SDL2_LIBRARIES}
     ${SDL2IMAGE_LIBRARIES}
@@ -92,9 +92,9 @@ target_link_libraries(test3 PRIVATE
 
 if(WIN32)
     # Hide the console window
-    set_target_properties(test3 PROPERTIES WIN32_EXECUTABLE TRUE)
+    set_target_properties(thesis_project PROPERTIES WIN32_EXECUTABLE TRUE)
 endif()
 
 if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(test3)
+    qt_finalize_executable(thesis_project)
 endif()
