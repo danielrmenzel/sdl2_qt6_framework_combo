@@ -1,94 +1,43 @@
 // SDLApp.cpp
 #include "SDLApp.h"
-#include <QCoreApplication> // Include QCoreApplication for platform detection
+#include <QCoreApplication>
 #include <QDebug>
 #include <QDir>
 #include <filesystem>
 #include <iostream>
 #include <unistd.h>
 
-// Constants for text input field size and position within SDL2 Window
+#define SDL_MAIN_HANDLED
 static constexpr int SQUARE_WIDTH = 540;
 static constexpr int SQUARE_HEIGHT = 50;
 int squareX = 50;
 int squareY = 140;
 
-/*
- * Constructor for SDLApp
- * @param parent - The parent object
- */
-SDLApp::SDLApp(QObject *parent)
-    : QObject(parent)
-    , // Set the parent QObject
-    window(nullptr)
-    , // SDL Window
-    renderer(nullptr)
-    , // SDL Renderer
-    closeWindowBtnClickedSDL(false)
-    , // Flag to track status of 'Close Window' button
-    textInputMode(false)
-    , // Flag to track if text input mode is active inside SDL2 Window
-    textInputBuffer("")
-    ,             // Buffer to store text input
-    font(nullptr) // Font for rendering text, tbd
-{}
+bool sdlWindowActive = false;
 
-/*
- *Destructor for SDLApp
-*/
-SDLApp::~SDLApp()
-{
+SDLApp::SDLApp(QObject *parent)
+    : QObject(parent), window(nullptr), renderer(nullptr), closeWindowBtnClickedSDL(false),
+    textInputMode(false), textInputBuffer(""), font(nullptr) {
+    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+        qDebug() << "SDL_Init Error:" << SDL_GetError();
+        return;
+    }
+}
+
+SDLApp::~SDLApp() {
     cleanUp();
 }
-
-/*
- * Opens or closes SDL2 Window from within QT main window
-*/
-void SDLApp::openOrToggleWindow()
-{
-    if (window == nullptr) {
-        if (!init()) {
-            qDebug() << "Failed to initialize SDLApp.";
-        } else {
-            render();
-        }
-    } else {
-        cleanUp(); // closes SDL2 window if it already exists
-    }
-}
-
-/*
- * Cleans up SDL resources specific to the window
-*/
-void SDLApp::cleanUpSDLWindow()
-{
-    if (renderer) {
-        SDL_DestroyRenderer(renderer);
-        renderer = nullptr;
-    }
-    if (window) {
-        SDL_DestroyWindow(window);
-        window = nullptr;
-    }
-}
-
-/*
- * Initializes SDLApp
-*/
-bool SDLApp::init()
-{
+// Initializes SDLApp
+bool SDLApp::init() {
     qDebug() << "Initializing SDLApp...";
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         qDebug() << "SDL_Init Error:" << SDL_GetError();
         return false;
     }
 
+    // Ensure TTF is initialized every time we intend to use it
     if (TTF_Init() == -1) {
         qDebug() << "TTF_Init Error:" << TTF_GetError();
-        return false;
-    }
-    if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)) {
-        qDebug() << "IMG_Init Error:" << IMG_GetError();
         return false;
     }
 
@@ -103,28 +52,87 @@ bool SDLApp::init()
         qDebug() << "SDL_CreateRenderer Error:" << SDL_GetError();
         return false;
     }
-    initTextAndImages();
-
-    qDebug() << "SDLApp initialized successfully.";
-    return true;
+    //render();
+    return initTextAndImages();
 }
 
-/*
- * Initializes SDL2 text and image capabilities
-*/
-bool SDLApp::initTextAndImages()
-{
+// Cleans up SDL resources specific to the window
+void SDLApp::cleanUpSDLWindow() {
+    if (renderer) {
+        SDL_DestroyRenderer(renderer);
+        renderer = nullptr;
+    }
+    if (window) {
+        SDL_DestroyWindow(window);
+        window = nullptr;
+    }
+
+}
+
+
+// Cleans up all SDL resources
+void SDLApp::cleanUp() {
+    cleanUpSDLWindow(); // Ensure window-specific resources are cleaned first
+
+    if (font) {
+        TTF_CloseFont(font);
+        font = nullptr;
+    }
+
+    // Only call TTF_Quit() when you're completely done with all font operations in the application
+    TTF_Quit();
+    IMG_Quit();
+    SDL_Quit();
+    qDebug() << "SDLApp cleaned up and quit.";
+}
+
+
+void SDLApp::openOrToggleWindow() {
+    if (window == nullptr) {
+        if (!init()) {
+            qDebug() << "Failed to initialize SDLApp.";
+        }
+        render();
+    } else {
+        //render();
+        cleanUpSDLWindow();
+    }
+}
+
+bool SDLApp::checkCursorLocation() {
+    int mouseX, mouseY;
+    SDL_GetGlobalMouseState(&mouseX, &mouseY); // Get the cursor position relative to the screen
+
+    int winX, winY, winWidth, winHeight;
+    SDL_GetWindowPosition(window, &winX, &winY); // Get the window position relative to the screen
+    SDL_GetWindowSize(window, &winWidth, &winHeight);
+
+    bool cursorIsInside = (mouseX >= winX && mouseX <= winX + winWidth) &&
+                          (mouseY >= winY && mouseY <= winY + winHeight);
+
+    static bool lastCursorInside = false;
+    if (cursorIsInside != lastCursorInside) {
+        if (cursorIsInside) {
+            qDebug() << "Cursor has entered the SDL window.";
+            //return true;
+        } else {
+            qDebug() << "Cursor has left the SDL window.";
+        }
+        lastCursorInside = cursorIsInside;
+    }
+    return cursorIsInside;
+    //return false;
+}
+
+
+
+bool SDLApp::initTextAndImages() {
     std::string fullPath(__FILE__);
     std::filesystem::path pathObj(fullPath);
     std::filesystem::path dirPath = pathObj.parent_path();
 
-    std::cout << "Directory of main.cpp: " << dirPath << std::endl;
-
-    std::string imagePath;
-    std::string fontPath;
-
-    imagePath = dirPath.string() + "/assets/images/banner.jpg";
-    fontPath = dirPath.string() + "/assets/fonts/alagard.ttf";
+    std::string imagePath = dirPath.string() + "/assets/images/banner.jpg";
+    std::string fontPath = dirPath.string() + "/assets/fonts/alagard.ttf";
 
     imageTexture = IMG_LoadTexture(renderer, imagePath.c_str());
     if (!imageTexture) {
@@ -138,25 +146,13 @@ bool SDLApp::initTextAndImages()
         return false;
     }
     textColor = {64, 64, 64, 255};
+
     return true;
 }
-/*
- * Submitted text entered in QT Window
-*/
-void SDLApp::submitText(const std::string &text)
-{
-    qDebug() << "Emitting textEntered signal with text:" << QString::fromStdString(text);
 
-    this->submittedText = "Message from mainwindow: " + text;
-    render();
-    //emit textEntered(QString::fromStdString(text));
-}
+void SDLApp::processEvents() {
+    static bool cursorWasInside = false; // Static variable to track the cursor's last known position
 
-/*
- * Processes text entering and buttons
-*/
-void SDLApp::processEvents()
-{
     SDL_Event e;
     while (SDL_PollEvent(&e)) {
         switch (e.type) {
@@ -165,31 +161,30 @@ void SDLApp::processEvents()
             cleanUpSDLWindow();
             break;
         case SDL_TEXTINPUT:
-            // Add the text from the event to your input buffer
-            qDebug("character typed in SDL2 window");
+            qDebug() << "Character typed in SDL2 window.";
             handleTextInput(e);
             break;
         case SDL_KEYDOWN:
             if (e.key.keysym.sym == SDLK_BACKSPACE && !textInputBuffer.empty()) {
-                // Remove the last character from the text input buffer
                 textInputBuffer.pop_back();
                 render();
             } else if (e.key.keysym.sym == SDLK_RETURN) {
-                // When Enter key is pressed in text input mode
                 if (!textInputBuffer.empty()) {
-                    // Assuming you want to process/submit the text when Enter is pressed
-                    qDebug() << "Enter pressed, submitting text: "
-                             << QString::fromStdString(textInputBuffer);
-                    emit textEntered(
-                        QString::fromStdString(textInputBuffer)); // Emit signal with the text
-
-                    // Optionally clear the buffer after submission
+                    qDebug() << "Enter pressed, submitting text: " << QString::fromStdString(textInputBuffer);
+                    emit textEntered(QString::fromStdString(textInputBuffer));
                     textInputBuffer.clear();
-                    render(); // Update the rendering to reflect the submitted or cleared text
+                    render();
                 }
-                textInputMode = false; // Exit text input mode if desired
+                textInputMode = false;
             }
             break;
+        case SDL_MOUSEMOTION:
+            checkCursorLocation();
+            break;
+        case SDL_WINDOWEVENT:
+            checkCursorLocation();
+            break;
+
         case SDL_MOUSEBUTTONDOWN: {
             int mouseX, mouseY;
             SDL_GetMouseState(&mouseX, &mouseY);
@@ -212,96 +207,11 @@ void SDLApp::processEvents()
                 handleButtonClick(e);
             }
         } break;
+
         default:
             break;
         }
     }
-}
-
-/*
- * Renders text message received from mainwindow
- * @param message  - message from mainwindow
- * @param x, y     - coordinates for position
- * @param fontSize - font Size
-*/
-void SDLApp::renderMessageFromMainwindow(const std::string &message, int x, int y, int fontSize)
-{
-    int textWidth, textHeight;
-    SDL_Texture *texture = createTextTexture(message, textWidth, textHeight);
-    if (!texture)
-        return;
-
-    SDL_Rect renderQuad = {x, y, textWidth, textHeight};
-    SDL_RenderCopy(renderer, texture, NULL, &renderQuad);
-    SDL_DestroyTexture(texture);
-}
-
-/*
- * Renders Buttons
- * @param renderer - SDL Renderer
- * @param text     - button text
- * @param x,y      - coordinates for button position
-*/
-void SDLApp::renderButton(SDL_Renderer *renderer, const char *text, int x, int y)
-{
-    SDL_SetRenderDrawColor(renderer, 211, 211, 211, 255);
-    SDL_Rect buttonRect = {x, y, BUTTON_WIDTH, BUTTON_HEIGHT};
-    SDL_RenderFillRect(renderer, &buttonRect);
-
-    int textWidth, textHeight;
-    SDL_Texture *textTexture = createTextTexture(text, textWidth, textHeight);
-    if (!textTexture)
-        return;
-
-    // Adjust text position based on button position and size
-    int textX = x + (BUTTON_WIDTH - textWidth) / 2;
-    int textY = y + (BUTTON_HEIGHT - textHeight) / 2;
-    SDL_Rect textRect = {textX, textY, textWidth, textHeight};
-    SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
-    SDL_DestroyTexture(textTexture);
-}
-
-/*
- * creates texture for text
- * @param message    - text
- * @param textWidth  - width for text
- * @param textHeigth - heigth for text
-*/
-SDL_Texture *SDLApp::createTextTexture(const std::string &message, int &textWidth, int &textHeight)
-{
-    if (!font) {
-        qDebug() << "Font not initialized.";
-        return nullptr;
-    }
-
-    SDL_Surface *surface = TTF_RenderText_Solid(font, message.c_str(), textColor);
-    if (!surface) {
-        qDebug() << "Failed to create text surface:" << TTF_GetError();
-        return nullptr;
-    }
-
-    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_FreeSurface(surface);
-    if (!texture) {
-        qDebug() << "Failed to create texture from surface:" << SDL_GetError();
-        return nullptr;
-    }
-
-    SDL_QueryTexture(texture, NULL, NULL, &textWidth, &textHeight);
-    return texture;
-}
-
-/*
- * Checks if mouse is hovering over button
- * @param mouseX, mouseY            - coordinates of cursor
- * @param buttonX, buttonY          - coordinates of button
- * @param buttonWidth, buttonHeigth - dimensions of button
-*/
-bool SDLApp::isMouseInsideButton(
-    int mouseX, int mouseY, int buttonX, int buttonY, int buttonWidth, int buttonHeight)
-{
-    return (mouseX >= buttonX && mouseX <= buttonX + buttonWidth && mouseY >= buttonY
-            && mouseY <= buttonY + buttonHeight);
 }
 
 /*
@@ -342,100 +252,140 @@ void SDLApp::handleButtonClick(SDL_Event &event)
 }
 
 /*
- * handles text input
- * @param event - SDL Event
+ * Checks if mouse is hovering over button
+ * @param mouseX, mouseY            - coordinates of cursor
+ * @param buttonX, buttonY          - coordinates of button
+ * @param buttonWidth, buttonHeigth - dimensions of button
 */
-void SDLApp::handleTextInput(SDL_Event &event)
+bool SDLApp::isMouseInsideButton(
+    int mouseX, int mouseY, int buttonX, int buttonY, int buttonWidth, int buttonHeight)
 {
+    return (mouseX >= buttonX && mouseX <= buttonX + buttonWidth && mouseY >= buttonY
+            && mouseY <= buttonY + buttonHeight);
+}
+
+
+void SDLApp::handleTextInput(SDL_Event &event) {
     if (textInputMode) {
         textInputBuffer += event.text.text;
         render();
     }
 }
 
-/*
- * renders SDL window
-*/
-void SDLApp::render()
-{
+void SDLApp::submitText(const std::string &text) {
+    qDebug() << "Emitting textEntered signal with text:" << QString::fromStdString(text);
+    this->submittedText = "Message from mainwindow: " + text;
+    render();
+}
+
+void SDLApp::render() {
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // Red, for visibility
+    SDL_RenderClear(renderer);
     SDL_SetRenderDrawColor(renderer, 192, 192, 192, 255); // Background color
     SDL_RenderClear(renderer);
     if (!submittedText.empty()) {
-        renderMessageFromMainwindow(submittedText, 50, 400, 24); // Example position and size
+        renderMessageFromMainwindow(submittedText, 50, 400, 24);
     }
 
     int imgWidth, imgHeight;
     SDL_QueryTexture(imageTexture, NULL, NULL, &imgWidth, &imgHeight);
-    SDL_Rect destRect = {0, 0, imgWidth, imgHeight}; // Corrected line
-
+    SDL_Rect destRect = {0, 0, imgWidth, imgHeight};
     SDL_RenderCopy(renderer, imageTexture, NULL, &destRect);
 
-    // Calculate input field position and size
     int inputFieldX = 50;
     int inputFieldY = 140;
     int inputFieldWidth = 540;
     int inputFieldHeight = 50;
 
-    // Draw the white input field
     if (textInputMode) {
-        // Render input field in a different color when in text input mode
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // Light blue color
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     } else {
-        SDL_SetRenderDrawColor(renderer, 220, 220, 220, 255); // Lighter grey color
+        SDL_SetRenderDrawColor(renderer, 220, 220, 220, 255);
     }
     SDL_Rect inputRect = {inputFieldX, inputFieldY, inputFieldWidth, inputFieldHeight};
     SDL_RenderFillRect(renderer, &inputRect);
 
-    // Calculate button positions based on input field dimensions
     int buttonX1 = inputFieldX + inputFieldWidth / 4 - BUTTON_WIDTH / 2;
     int buttonX2 = inputFieldX + inputFieldWidth * 3 / 4 - BUTTON_WIDTH / 2;
 
-    // Draw buttons centered horizontally relative to the input field
-    renderButton(renderer, "Submit Text", buttonX1, buttonY);
-    renderButton(renderer, "Close Window", buttonX2, buttonY);
+    renderButton(renderer, "Submit Text", buttonX1, inputFieldY + 60);
+    renderButton(renderer, "Close Window", buttonX2, inputFieldY + 60);
 
-    // Render the text input buffer if it's not empty
     if (!textInputBuffer.empty()) {
-        renderMessageFromMainwindow(textInputBuffer, 55, 145, 24); // Adjust text position
+        renderMessageFromMainwindow(textInputBuffer, 55, 145, 24);
     }
 
     SDL_RenderPresent(renderer);
 }
 
-/*
- * Checks if sdl2 window should be closed
-*/
-bool SDLApp::shouldQuit() const
-{
-    return closeWindowBtnClickedSDL;
+// void SDLApp::cleanUp() {
+//     if (renderer) {
+//         SDL_DestroyRenderer(renderer);
+//         renderer = nullptr;
+//     }
+//     if (window) {
+//         SDL_DestroyWindow(window);
+//         window = nullptr;
+//     }
+//     if (font) {
+//         TTF_CloseFont(font);
+//         font = nullptr;
+//     }
+//     if (imageTexture) {
+//         SDL_DestroyTexture(imageTexture);
+//         imageTexture = nullptr;
+//     }
+//     TTF_Quit();
+//     IMG_Quit();
+//     SDL_Quit();
+//     qDebug() << "SDLApp cleaned up and quit.";
+// }
+
+SDL_Texture *SDLApp::createTextTexture(const std::string &message, int &textWidth, int &textHeight) {
+    if (!font) {
+        qDebug() << "Font not initialized.";
+        return nullptr;
+    }
+
+    SDL_Surface *surface = TTF_RenderText_Solid(font, message.c_str(), textColor);
+    if (!surface) {
+        qDebug() << "Failed to create text surface:" << TTF_GetError();
+        return nullptr;
+    }
+
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_FreeSurface(surface);
+    if (!texture) {
+        qDebug() << "Failed to create texture from surface:" << SDL_GetError();
+        return nullptr;
+    }
+
+    SDL_QueryTexture(texture, NULL, NULL, &textWidth, &textHeight);
+    return texture;
 }
 
-/*
- * cleans up SDL app
-*/
-void SDLApp::cleanUp()
-{
-    if (renderer) {
-        SDL_DestroyRenderer(renderer);
-        renderer = nullptr;
-    }
-    if (window) {
-        SDL_DestroyWindow(window);
-        window = nullptr;
-    }
+void SDLApp::renderMessageFromMainwindow(const std::string &message, int x, int y, int fontSize) {
+    int textWidth, textHeight;
+    SDL_Texture *texture = createTextTexture(message, textWidth, textHeight);
+    if (!texture) return;
 
-    if (font) {
-        TTF_CloseFont(font);
-        font = nullptr;
-    }
-    if (imageTexture) {
-        SDL_DestroyTexture(imageTexture);
-        imageTexture = nullptr;
-    }
+    SDL_Rect renderQuad = {x, y, textWidth, textHeight};
+    SDL_RenderCopy(renderer, texture, NULL, &renderQuad);
+    SDL_DestroyTexture(texture);
+}
 
-    TTF_Quit();
-    IMG_Quit();
+void SDLApp::renderButton(SDL_Renderer *renderer, const char *text, int x, int y) {
+    SDL_SetRenderDrawColor(renderer, 211, 211, 211, 255);
+    SDL_Rect buttonRect = {x, y, BUTTON_WIDTH, BUTTON_HEIGHT};
+    SDL_RenderFillRect(renderer, &buttonRect);
 
-    SDL_Quit();
-    qDebug() << "SDLApp cleaned up and quit.";
+    int textWidth, textHeight;
+    SDL_Texture *textTexture = createTextTexture(text, textWidth, textHeight);
+    if (!textTexture) return;
+
+    int textX = x + (BUTTON_WIDTH - textWidth) / 2;
+    int textY = y + (BUTTON_HEIGHT - textHeight) / 2;
+    SDL_Rect textRect = {textX, textY, textWidth, textHeight};
+    SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+    SDL_DestroyTexture(textTexture);
 }
