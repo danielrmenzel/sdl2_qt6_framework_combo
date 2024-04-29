@@ -126,6 +126,7 @@ bool SDLApp::checkCursorLocation() {
 
 
 
+
 bool SDLApp::initTextAndImages() {
     std::string fullPath(__FILE__);
     std::filesystem::path pathObj(fullPath);
