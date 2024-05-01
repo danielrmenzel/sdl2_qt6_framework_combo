@@ -7,6 +7,8 @@
 #include <iostream>
 #include <unistd.h>
 
+
+
 #define SDL_MAIN_HANDLED
 static constexpr int SQUARE_WIDTH = 540;
 static constexpr int SQUARE_HEIGHT = 50;
@@ -104,7 +106,7 @@ bool SDLApp::checkCursorLocation() {
     SDL_GetGlobalMouseState(&mouseX, &mouseY); // Get the cursor position relative to the screen
 
     int winX, winY, winWidth, winHeight;
-    SDL_GetWindowPosition(window, &winX, &winY); // Get the window position relative to the screen
+    SDL_GetWindowPosition(window, &winX, &winY);
     SDL_GetWindowSize(window, &winWidth, &winHeight);
 
     bool cursorIsInside = (mouseX >= winX && mouseX <= winX + winWidth) &&
@@ -114,16 +116,20 @@ bool SDLApp::checkCursorLocation() {
     if (cursorIsInside != lastCursorInside) {
         if (cursorIsInside) {
             qDebug() << "Cursor has entered the SDL window.";
-            //return true;
+            bringWindowToFront(); // Custom function to manipulate window focus
         } else {
             qDebug() << "Cursor has left the SDL window.";
         }
         lastCursorInside = cursorIsInside;
     }
     return cursorIsInside;
-    //return false;
 }
 
+#ifdef __APPLE__
+void SDLApp::bringWindowToFront() {
+    SDL_RaiseWindow(window);
+}
+#endif
 
 
 

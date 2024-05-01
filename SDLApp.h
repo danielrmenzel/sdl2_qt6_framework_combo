@@ -26,6 +26,8 @@ public:
     bool init();
     void processEvents();
     bool checkCursorLocation();
+    void bringWindowToFront();
+
 
     void openOrToggleWindow();
     void cleanUp();
