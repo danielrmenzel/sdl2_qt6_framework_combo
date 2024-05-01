@@ -55,6 +55,15 @@ else() # Assuming Linux or other platforms
     set(SDL2TTF_LIBRARIES "-lSDL2_ttf")
 endif()
 
+
+# Find the X11 package (needed to put sdl window to front when using linux)
+find_package(X11 REQUIRED)
+
+#include_directories(${X11_INCLUDE_DIR})
+
+
+
+
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(thesis_project
         MANUAL_FINALIZATION
@@ -80,6 +89,7 @@ target_include_directories(thesis_project PRIVATE
     ${SDL2IMAGE_INCLUDE_DIRS}
     ${SDL2TTF_INCLUDE_DIRS}
     ${PROJECT_SOURCE_DIR}/include # If you have additional include directories
+    ${X11_INCLUDE_DIR}
 )
 
 # Link libraries
@@ -88,6 +98,7 @@ target_link_libraries(thesis_project PRIVATE
     ${SDL2_LIBRARIES}
     ${SDL2IMAGE_LIBRARIES}
     ${SDL2TTF_LIBRARIES}
+    ${X11_LIBRARIES}
 )
 
 if(WIN32)
