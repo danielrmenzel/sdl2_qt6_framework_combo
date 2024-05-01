@@ -7,10 +7,15 @@
 #include <iostream>
 #include <unistd.h>
 
+
+#include "SDL_syswm.h" // Include the SDL system window manager header
 #ifdef _WIN32
 #include <windows.h>
 #endif
 
+/*
+ * Include the necessary header file (SDL_syswm.h) where SDL_SysWMinfo and SDL_GetWindowWMInfo are declared.
+ */
 
 #define SDL_MAIN_HANDLED
 static constexpr int SQUARE_WIDTH = 540;
@@ -74,7 +79,7 @@ void SDLApp::cleanUpSDLWindow() {
 
 }
 
-
+/*
 // Cleans up all SDL resources
 void SDLApp::cleanUp() {
     cleanUpSDLWindow(); // Ensure window-specific resources are cleaned first
@@ -89,7 +94,7 @@ void SDLApp::cleanUp() {
     IMG_Quit();
     SDL_Quit();
     qDebug() << "SDLApp cleaned up and quit.";
-}
+}*/
 
 
 void SDLApp::openOrToggleWindow() {
@@ -234,26 +239,8 @@ void SDLApp::processEvents() {
 
     SDL_StopTextInput();  // Stop text input after the loop ends.
     SDL_Quit();  // Quit SDL cleanly after the loop is exited.
-
-
-
-
-
-    /*
-    SDL_StartTextInput();
-    SDL_Event event;
-    bool running = true;
-    while (running) {
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) {
-                running = false;
-            } else if (event.type == SDL_TEXTINPUT) {
-                std::cout << "Text input: " << event.text.text << std::endl;
-            }
-        }
-    }
-    */
 }
+
 
 /*
  * Handles button clicks
@@ -359,28 +346,28 @@ void SDLApp::render() {
     SDL_RenderPresent(renderer);
 }
 
-// void SDLApp::cleanUp() {
-//     if (renderer) {
-//         SDL_DestroyRenderer(renderer);
-//         renderer = nullptr;
-//     }
-//     if (window) {
-//         SDL_DestroyWindow(window);
-//         window = nullptr;
-//     }
-//     if (font) {
-//         TTF_CloseFont(font);
-//         font = nullptr;
-//     }
-//     if (imageTexture) {
-//         SDL_DestroyTexture(imageTexture);
-//         imageTexture = nullptr;
-//     }
-//     TTF_Quit();
-//     IMG_Quit();
-//     SDL_Quit();
-//     qDebug() << "SDLApp cleaned up and quit.";
-// }
+void SDLApp::cleanUp() {
+    if (renderer) {
+        SDL_DestroyRenderer(renderer);
+        renderer = nullptr;
+    }
+    if (window) {
+        SDL_DestroyWindow(window);
+        window = nullptr;
+    }
+    if (font) {
+        TTF_CloseFont(font);
+        font = nullptr;
+    }
+    if (imageTexture) {
+        SDL_DestroyTexture(imageTexture);
+        imageTexture = nullptr;
+    }
+    TTF_Quit();
+    IMG_Quit();
+    SDL_Quit();
+    qDebug() << "SDLApp cleaned up and quit.";
+}
 
 SDL_Texture *SDLApp::createTextTexture(const std::string &message, int &textWidth, int &textHeight) {
     if (!font) {
