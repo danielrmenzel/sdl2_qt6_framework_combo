@@ -31,11 +31,11 @@ if(APPLE)
     find_library(SDL2IMAGE_FRAMEWORK SDL2_image REQUIRED)
     find_library(SDL2TTF_LIBRARIES SDL2_ttf REQUIRED)
 
-    set(SDL2_INCLUDE_DIRS "/usr/local/include/SDL2")
+    set(SDL2_INCLUDE_DIRS "/opt/homebrew/Cellar/sdl2/2.30.2/include/SDL2")
     set(SDL2_LIBRARIES ${SDL2_FRAMEWORK})
-    set(SDL2IMAGE_INCLUDE_DIRS "/usr/local/include/SDL2")
+    set(SDL2IMAGE_INCLUDE_DIRS "/opt/homebrew/Cellar/sdl2_image/2.8.2_1/include/SDL2")
     set(SDL2IMAGE_LIBRARIES ${SDL2IMAGE_FRAMEWORK})
-    set(SDL2TTF_INCLUDE_DIRS "/usr/local/include/SDL2")
+    set(SDL2TTF_INCLUDE_DIRS "/opt/homebrew/Cellar/sdl2_ttf/2.22.0/include/SDL2")
     set(SDL2TTF_LIBRARIES ${SDL2TTF_LIBRARIES})
 
 elseif(WIN32)
@@ -54,6 +54,15 @@ else() # Assuming Linux or other platforms
     set(SDL2TTF_INCLUDE_DIRS "/usr/include/SDL2")
     set(SDL2TTF_LIBRARIES "-lSDL2_ttf")
 endif()
+
+
+# Find the X11 package (needed to put sdl window to front when using linux)
+find_package(X11 REQUIRED)
+
+#include_directories(${X11_INCLUDE_DIR})
+
+
+
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(thesis_project
@@ -80,6 +89,7 @@ target_include_directories(thesis_project PRIVATE
     ${SDL2IMAGE_INCLUDE_DIRS}
     ${SDL2TTF_INCLUDE_DIRS}
     ${PROJECT_SOURCE_DIR}/include # If you have additional include directories
+    ${X11_INCLUDE_DIR}
 )
 
 # Link libraries
@@ -88,6 +98,7 @@ target_link_libraries(thesis_project PRIVATE
     ${SDL2_LIBRARIES}
     ${SDL2IMAGE_LIBRARIES}
     ${SDL2TTF_LIBRARIES}
+    ${X11_LIBRARIES}
 )
 
 if(WIN32)

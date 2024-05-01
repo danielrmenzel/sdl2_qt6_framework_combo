@@ -101,10 +101,9 @@ void SDLApp::openOrToggleWindow() {
 
 bool SDLApp::checkCursorLocation() {
     int mouseX, mouseY;
-    SDL_GetGlobalMouseState(&mouseX, &mouseY); // Get the cursor position relative to the screen
-
+    SDL_GetGlobalMouseState(&mouseX, &mouseY);
     int winX, winY, winWidth, winHeight;
-    SDL_GetWindowPosition(window, &winX, &winY); // Get the window position relative to the screen
+    SDL_GetWindowPosition(window, &winX, &winY);
     SDL_GetWindowSize(window, &winWidth, &winHeight);
 
     bool cursorIsInside = (mouseX >= winX && mouseX <= winX + winWidth) &&
@@ -114,16 +113,45 @@ bool SDLApp::checkCursorLocation() {
     if (cursorIsInside != lastCursorInside) {
         if (cursorIsInside) {
             qDebug() << "Cursor has entered the SDL window.";
-            //return true;
+            bringWindowToFront();
         } else {
             qDebug() << "Cursor has left the SDL window.";
         }
         lastCursorInside = cursorIsInside;
     }
     return cursorIsInside;
-    //return false;
 }
 
+#ifdef __APPLE__
+void SDLApp::bringWindowToFront() {
+    SDL_RaiseWindow(window);
+}
+#elif defined(_WIN32)
+void SDLApp::bringWindowToFront() {
+    SDL_SysWMinfo wmInfo;
+    SDL_VERSION(&wmInfo.version);
+    if (SDL_GetWindowWMInfo(window, &wmInfo)) {
+        HWND hwnd = wmInfo.info.win.window;
+        SetForegroundWindow(hwnd);
+    }
+}
+#else // Assuming Linux or other platforms
+#include <X11/Xlib.h>
+#include <SDL2/SDL_syswm.h>
+
+void SDLApp::bringWindowToFront() {
+    SDL_SysWMinfo wmInfo;
+    SDL_VERSION(&wmInfo.version);  // Initialize wmInfo to the version SDL compiles against
+    if (SDL_GetWindowWMInfo(window, &wmInfo)) {
+        Display* display = wmInfo.info.x11.display;
+        Window win = wmInfo.info.x11.window;
+
+        // This raises the window and attempts to focus it
+        XRaiseWindow(display, win);
+        XSetInputFocus(display, win, RevertToParent, CurrentTime);
+    }
+}
+#endif
 
 
 
