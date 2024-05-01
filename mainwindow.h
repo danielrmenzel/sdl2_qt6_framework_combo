@@ -34,6 +34,7 @@ private:
     Ui::MainWindow *ui;
     SDLApp *sdlApp;
     QTimer *sdlTimer;
+    QTimer *cursorLocationTimer;
     QLabel *displayTextLabel;
     QLineEdit *textInputField;
 };
