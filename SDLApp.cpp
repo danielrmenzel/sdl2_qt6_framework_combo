@@ -7,6 +7,9 @@
 #include <iostream>
 #include <unistd.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 
 #define SDL_MAIN_HANDLED
@@ -128,6 +131,15 @@ bool SDLApp::checkCursorLocation() {
 #ifdef __APPLE__
 void SDLApp::bringWindowToFront() {
     SDL_RaiseWindow(window);
+}
+#elif defined(_WIN32)
+void SDLApp::bringWindowToFront() {
+    SDL_SysWMinfo wmInfo;
+    SDL_VERSION(&wmInfo.version);
+    if (SDL_GetWindowWMInfo(window, &wmInfo)) {
+        HWND hwnd = wmInfo.info.win.window;
+        SetForegroundWindow(hwnd);
+    }
 }
 #endif
 
