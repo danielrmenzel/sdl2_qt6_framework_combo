@@ -26,12 +26,12 @@ public:
     bool init();
     void processEvents();
     bool checkCursorLocation();
-    void bringWindowToFront();
-
 
     void openOrToggleWindow();
     void cleanUp();
     void cleanUpSDLWindow();
+    void bringWindowToFront();
+
 
     bool initTextAndImages();
     SDL_Texture *createTextTexture(const std::string &message, int &textWidth, int &textHeight);

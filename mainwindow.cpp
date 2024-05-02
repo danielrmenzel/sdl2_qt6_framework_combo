@@ -111,12 +111,8 @@ void MainWindow::onTextEntered(const QString &text) {
  * Handles window close event, releases SDL resources
  */
 void MainWindow::closeEvent(QCloseEvent *event) {
-    // Stop the SDL timer
-    sdlTimer->stop();
-
-    // Stop the cursor location timer
-    cursorLocationTimer->stop();
-
     sdlApp->cleanUp();
     QMainWindow::closeEvent(event);
+    QApplication::quit();  // Ensures the Qt application quits
+
 }

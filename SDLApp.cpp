@@ -6,7 +6,8 @@
 #include <filesystem>
 #include <iostream>
 #include <unistd.h>
-#include <SDL_syswm.h>  // Include SDL system window manager header
+
+
 
 #define SDL_MAIN_HANDLED
 static constexpr int SQUARE_WIDTH = 540;
@@ -102,7 +103,8 @@ void SDLApp::openOrToggleWindow() {
 
 bool SDLApp::checkCursorLocation() {
     int mouseX, mouseY;
-    SDL_GetGlobalMouseState(&mouseX, &mouseY);
+    SDL_GetGlobalMouseState(&mouseX, &mouseY); // Get the cursor position relative to the screen
+
     int winX, winY, winWidth, winHeight;
     SDL_GetWindowPosition(window, &winX, &winY);
     SDL_GetWindowSize(window, &winWidth, &winHeight);
@@ -114,7 +116,7 @@ bool SDLApp::checkCursorLocation() {
     if (cursorIsInside != lastCursorInside) {
         if (cursorIsInside) {
             qDebug() << "Cursor has entered the SDL window.";
-            bringWindowToFront();
+            bringWindowToFront(); // Custom function to manipulate window focus
         } else {
             qDebug() << "Cursor has left the SDL window.";
         }
@@ -126,32 +128,6 @@ bool SDLApp::checkCursorLocation() {
 #ifdef __APPLE__
 void SDLApp::bringWindowToFront() {
     SDL_RaiseWindow(window);
-}
-#elif defined(_WIN32)
-#include <windows.h>
-void SDLApp::bringWindowToFront() {
-    SDL_SysWMinfo wmInfo;
-    SDL_VERSION(&wmInfo.version);
-    if (SDL_GetWindowWMInfo(window, &wmInfo)) {
-        HWND hwnd = wmInfo.info.win.window;
-        SetForegroundWindow(hwnd);
-    }
-}
-#else // Assuming Linux or other platforms
-#include <X11/Xlib.h>
-#include <SDL2/SDL_syswm.h>
-
-void SDLApp::bringWindowToFront() {
-    SDL_SysWMinfo wmInfo;
-    SDL_VERSION(&wmInfo.version);  // Initialize wmInfo to the version SDL compiles against
-    if (SDL_GetWindowWMInfo(window, &wmInfo)) {
-        Display* display = wmInfo.info.x11.display;
-        Window win = wmInfo.info.x11.window;
-
-        // This raises the window and attempts to focus it
-        XRaiseWindow(display, win);
-        XSetInputFocus(display, win, RevertToParent, CurrentTime);
-    }
 }
 #endif
 
@@ -184,65 +160,87 @@ bool SDLApp::initTextAndImages() {
 void SDLApp::processEvents() {
     static bool cursorWasInside = false; // Static variable to track the cursor's last known position
 
+    // Include SDL_StartTextInput() to initiate text input capture at the start.
+    SDL_StartTextInput();
     SDL_Event e;
-    while (SDL_PollEvent(&e)) {
-        switch (e.type) {
-        case SDL_QUIT:
-            qDebug() << "SDL_QUIT event received (X-Button), closing SDL window.";
-            cleanUpSDLWindow();
-            break;
-        case SDL_TEXTINPUT:
-            qDebug() << "Character typed in SDL2 window.";
-            handleTextInput(e);
-            break;
-        case SDL_KEYDOWN:
-            if (e.key.keysym.sym == SDLK_BACKSPACE && !textInputBuffer.empty()) {
-                textInputBuffer.pop_back();
-                render();
-            } else if (e.key.keysym.sym == SDLK_RETURN) {
-                if (!textInputBuffer.empty()) {
-                    qDebug() << "Enter pressed, submitting text: " << QString::fromStdString(textInputBuffer);
-                    emit textEntered(QString::fromStdString(textInputBuffer));
-                    textInputBuffer.clear();
+    bool running = true;  // Maintain a running loop similar to the first code part.
+
+    while (running) {
+        while (SDL_PollEvent(&e)) {
+            switch (e.type) {
+            case SDL_QUIT:
+                qDebug() << "SDL_QUIT event received (X-Button), closing SDL window.";
+                running = false;  // Set running to false to exit the loop.
+                cleanUpSDLWindow();
+                break;
+            case SDL_TEXTINPUT:
+                qDebug() << "Character typed in SDL2 window: " << e.text.text;
+                handleTextInput(e);  // Make sure this function handles the string correctly.
+                break;
+            case SDL_KEYDOWN:
+                if (e.key.keysym.sym == SDLK_BACKSPACE && !textInputBuffer.empty()) {
+                    textInputBuffer.pop_back();
                     render();
+                } else if (e.key.keysym.sym == SDLK_RETURN) {
+                    if (!textInputBuffer.empty()) {
+                        qDebug() << "Enter pressed, submitting text: " << QString::fromStdString(textInputBuffer);
+                        emit textEntered(QString::fromStdString(textInputBuffer));
+                        textInputBuffer.clear();
+                        render();
+                    }
+                    textInputMode = false;
+                    SDL_StopTextInput();  // Ensure to stop text input when not needed.
                 }
-                textInputMode = false;
-            }
-            break;
-        case SDL_MOUSEMOTION:
-            checkCursorLocation();
-            break;
-        case SDL_WINDOWEVENT:
-            checkCursorLocation();
-            break;
+                break;
+            case SDL_MOUSEMOTION:
+                checkCursorLocation();
+                break;
+            case SDL_WINDOWEVENT:
+                checkCursorLocation();
+                break;
+            case SDL_MOUSEBUTTONDOWN:
+                int mouseX, mouseY;
+                SDL_GetMouseState(&mouseX, &mouseY);
 
-        case SDL_MOUSEBUTTONDOWN: {
-            int mouseX, mouseY;
-            SDL_GetMouseState(&mouseX, &mouseY);
-
-            // Check for click within the designated square
-            if (mouseX >= squareX && mouseX <= squareX + SQUARE_WIDTH && mouseY >= squareY
-                && mouseY <= squareY + SQUARE_HEIGHT) {
-                qDebug("Mouse click in designated text input area detected.");
-                textInputMode = true;
-                render();
-                if (textInputMode) {
-                    qDebug("Entering SDL_StartTextInput()");
-                    SDL_StartTextInput();
+                // Check for click within the designated square
+                if (mouseX >= squareX && mouseX <= squareX + SQUARE_WIDTH && mouseY >= squareY && mouseY <= squareY + SQUARE_HEIGHT) {
+                    qDebug() << "Mouse click in designated text input area detected.";
+                    textInputMode = true;
+                    render();
+                    SDL_StartTextInput();  // Confirm text input starts on mouse click.
                 } else {
-                    qDebug("Exiting SDL_StartTextInput()");
-
-                    SDL_StopTextInput();
+                    handleButtonClick(e);
                 }
-            } else {
-                handleButtonClick(e);
-            }
-        } break;
+                break;
 
-        default:
-            break;
+            default:
+                break;
+            }
+        }
+        // Consider adding some idle task or small delay here if CPU usage is too high.
+    }
+
+    SDL_StopTextInput();  // Stop text input after the loop ends.
+    SDL_Quit();  // Quit SDL cleanly after the loop is exited.
+
+
+
+
+
+    /*
+    SDL_StartTextInput();
+    SDL_Event event;
+    bool running = true;
+    while (running) {
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) {
+                running = false;
+            } else if (event.type == SDL_TEXTINPUT) {
+                std::cout << "Text input: " << event.text.text << std::endl;
+            }
         }
     }
+    */
 }
 
 /*
