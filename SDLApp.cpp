@@ -129,6 +129,33 @@ bool SDLApp::checkCursorLocation() {
 void SDLApp::bringWindowToFront() {
     SDL_RaiseWindow(window);
 }
+#elif defined(_WIN32)
+#include "SDL_syswm.h"
+#include <windows.h> // Include for SetForegroundWindow on Windows
+void SDLApp::bringWindowToFront() {
+    SDL_SysWMinfo wmInfo;
+    SDL_VERSION(&wmInfo.version);
+    if (SDL_GetWindowWMInfo(window, &wmInfo)) {
+        HWND hwnd = wmInfo.info.win.window;
+        SetForegroundWindow(hwnd);
+    }
+}
+#else // Assuming Linux or other platforms
+#include <X11/Xlib.h>
+#include <SDL2/SDL_syswm.h>
+
+void SDLApp::bringWindowToFront() {
+    SDL_SysWMinfo wmInfo;
+    SDL_VERSION(&wmInfo.version);  // Initialize wmInfo to the version SDL compiles against
+    if (SDL_GetWindowWMInfo(window, &wmInfo)) {
+        Display* display = wmInfo.info.x11.display;
+        Window win = wmInfo.info.x11.window;
+
+        // This raises the window and attempts to focus it
+        XRaiseWindow(display, win);
+        XSetInputFocus(display, win, RevertToParent, CurrentTime);
+    }
+}
 #endif
 
 
