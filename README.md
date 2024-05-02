@@ -1,6 +1,6 @@
 # Qt and SDL Integration Project
 
-This project demonstrates the integration of the Qt framework with the Simple DirectMedia Layer (SDL) library to create a GUI application that leverages SDL's functionalities for rendering and handling multimedia.
+This project demonstrates the integration of the Qt framework with the Simple DirectMedia Layer (SDL) library to create a GUI application that leverages SDL's functionalities for rendering and handling multimedia. The project was created with the QT Creator.
 
 ![final_app](https://github.com/danielrmenzel/sdl2_qt6_framework_combo/assets/109724990/52805229-624b-4ccb-a0eb-d9063c580bec)
 
