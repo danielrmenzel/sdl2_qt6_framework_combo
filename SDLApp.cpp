@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <iostream>
 #include <unistd.h>
+#include <SDL_syswm.h>  // Include SDL system window manager header
 
 #define SDL_MAIN_HANDLED
 static constexpr int SQUARE_WIDTH = 540;
@@ -127,6 +128,7 @@ void SDLApp::bringWindowToFront() {
     SDL_RaiseWindow(window);
 }
 #elif defined(_WIN32)
+#include <windows.h>
 void SDLApp::bringWindowToFront() {
     SDL_SysWMinfo wmInfo;
     SDL_VERSION(&wmInfo.version);
