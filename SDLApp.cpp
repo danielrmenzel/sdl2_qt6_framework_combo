@@ -194,18 +194,20 @@ void SDLApp::handleQuit() {
     qDebug() << "SDL resources cleaned up and SDL_Quit() called.";
 }
 
-void SDLApp::processEvents() {
+void SDLApp::processEvents()
+{
     SDL_Event e;
     bool running = true;
 
+    #ifndef __linux__
     while (running) {
+
+    #endif
         while (SDL_PollEvent(&e)) {
             switch (e.type) {
             case SDL_QUIT:
 
                 handleQuit();
-
-
 
                 break;
             case SDL_TEXTINPUT:
@@ -218,7 +220,8 @@ void SDLApp::processEvents() {
                     render();
                 } else if (e.key.keysym.sym == SDLK_RETURN) {
                     if (!textInputBuffer.empty()) {
-                        qDebug() << "Enter pressed, submitting text: " << QString::fromStdString(textInputBuffer);
+                        qDebug() << "Enter pressed, submitting text: "
+                                 << QString::fromStdString(textInputBuffer);
                         emit textEntered(QString::fromStdString(textInputBuffer));
                         textInputBuffer.clear();
                         render();
@@ -236,7 +239,8 @@ void SDLApp::processEvents() {
             case SDL_MOUSEBUTTONDOWN:
                 int mouseX, mouseY;
                 SDL_GetMouseState(&mouseX, &mouseY);
-                if (mouseX >= squareX && mouseX <= squareX + SQUARE_WIDTH && mouseY >= squareY && mouseY <= squareY + SQUARE_HEIGHT) {
+                if (mouseX >= squareX && mouseX <= squareX + SQUARE_WIDTH && mouseY >= squareY
+                    && mouseY <= squareY + SQUARE_HEIGHT) {
                     qDebug() << "Mouse click in designated text input area detected.";
                     textInputMode = true;
                     render();
@@ -252,11 +256,10 @@ void SDLApp::processEvents() {
 
         // Adding a small delay can reduce CPU usage
         SDL_Delay(10); // Delay in milliseconds to reduce CPU usage
-    }
+#ifndef __linux__
+        // }
 
-
-
-
+#endif
 }
 
 
