@@ -21,6 +21,8 @@ class MainWindow : public QMainWindow {
 
 public:
     explicit MainWindow(SDLApp *sdlApp, QWidget *parent = nullptr);
+    void onSDLWindowClosed();
+
     ~MainWindow();
 
 protected:
@@ -34,6 +36,7 @@ private:
     Ui::MainWindow *ui;
     SDLApp *sdlApp;
     QTimer *sdlTimer;
+    QTimer *cursorLocationTimer;
     QLabel *displayTextLabel;
     QLineEdit *textInputField;
 };
