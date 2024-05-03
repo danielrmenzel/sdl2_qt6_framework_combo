@@ -26,11 +26,13 @@ public:
     bool init();
     void processEvents();
     bool checkCursorLocation();
+    void bringWindowToFront();
+
 
     void openOrToggleWindow();
     void cleanUp();
     void cleanUpSDLWindow();
-    void bringWindowToFront();
+    void handleQuit();
 
 
     bool initTextAndImages();
@@ -45,6 +47,8 @@ signals:
     void textEntered(const QString &text);
     void windowMoved(int x, int y);
     void quitApplication();
+    void sdlWindowClosed();
+
 
 private:
     SDL_Window *window;
