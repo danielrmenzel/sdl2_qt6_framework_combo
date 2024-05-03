@@ -81,9 +81,20 @@ MainWindow::MainWindow(SDLApp *sdlApp, QWidget *parent)
         qDebug() << "Failed to connect SDLApp textEntered signal to MainWindow slot.";
     }
 
+
+    connect(sdlApp, &SDLApp::sdlWindowClosed, this, &MainWindow::onSDLWindowClosed);
+
+
+
     // Adjust the window size as needed
     this->setGeometry(100, 100, 400, 300); // Adjusted for better UI layout visibility
 }
+
+void MainWindow::onSDLWindowClosed() {
+    qDebug() << "SDL window has been closed. Qt application remains running.";
+    // Additional logic to handle the state after SDL window closure
+}
+
 
 /*
  * Destructor for MainWindow
@@ -111,8 +122,12 @@ void MainWindow::onTextEntered(const QString &text) {
  * Handles window close event, releases SDL resources
  */
 void MainWindow::closeEvent(QCloseEvent *event) {
+    // Stop the SDL timer
+    sdlTimer->stop();
+
+    // Stop the cursor location timer
+    cursorLocationTimer->stop();
+
     sdlApp->cleanUp();
     QMainWindow::closeEvent(event);
-    QApplication::quit();  // Ensures the Qt application quits
-
 }
