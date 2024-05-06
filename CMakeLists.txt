@@ -9,6 +9,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
+# Configure C++
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -53,16 +54,10 @@ else() # Assuming Linux or other platforms
     set(SDL2IMAGE_LIBRARIES "-lSDL2_image")
     set(SDL2TTF_INCLUDE_DIRS "/usr/include/SDL2")
     set(SDL2TTF_LIBRARIES "-lSDL2_ttf")
+
+    # Find the X11 package (needed to put sdl window to front when using linux)
+    find_package(X11 REQUIRED)
 endif()
-
-
-# Find the X11 package (needed to put sdl window to front when using linux)
-find_package(X11 REQUIRED)
-
-#include_directories(${X11_INCLUDE_DIR})
-
-
-
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(thesis_project
@@ -88,7 +83,7 @@ target_include_directories(thesis_project PRIVATE
     ${SDL2_INCLUDE_DIRS}
     ${SDL2IMAGE_INCLUDE_DIRS}
     ${SDL2TTF_INCLUDE_DIRS}
-    ${PROJECT_SOURCE_DIR}/include # If you have additional include directories
+    ${PROJECT_SOURCE_DIR}/include
     ${X11_INCLUDE_DIR}
 )
 
