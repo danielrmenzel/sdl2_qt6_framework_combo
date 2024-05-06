@@ -257,7 +257,7 @@ void SDLApp::processEvents()
         // Adding a small delay can reduce CPU usage
         SDL_Delay(10); // Delay in milliseconds to reduce CPU usage
 #ifndef __linux__
-        // }
+         }
 
 #endif
 }
