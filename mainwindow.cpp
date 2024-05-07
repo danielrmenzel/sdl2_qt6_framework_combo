@@ -63,12 +63,12 @@ MainWindow::MainWindow(SDLApp *sdlApp, QWidget *parent)
 
     mainLayout->addWidget(submitButton);
 
-    // Existing SDL Timer for processing events
+    // SDL Timer for processing events
     sdlTimer = new QTimer(this);
     connect(sdlTimer, &QTimer::timeout, sdlApp, &SDLApp::processEvents);
     sdlTimer->start(16); // Run approximately every 60Hz (16ms)
 
-    // New Timer for checking cursor location
+    // Timer for checking cursor location
     QTimer *cursorLocationTimer = new QTimer(this);
     connect(cursorLocationTimer, &QTimer::timeout, sdlApp, &SDLApp::checkCursorLocation);
     cursorLocationTimer->start(100); // Check cursor location every 100 milliseconds
@@ -80,21 +80,18 @@ MainWindow::MainWindow(SDLApp *sdlApp, QWidget *parent)
     } else {
         qDebug() << "Failed to connect SDLApp textEntered signal to MainWindow slot.";
     }
-
-
     connect(sdlApp, &SDLApp::sdlWindowClosed, this, &MainWindow::onSDLWindowClosed);
 
-
-
     // Adjust the window size as needed
-    this->setGeometry(100, 100, 400, 300); // Adjusted for better UI layout visibility
+    this->setGeometry(100, 100, 400, 300);
 }
 
+/*
+ * Handles SDL window close event for debugging
+ */
 void MainWindow::onSDLWindowClosed() {
     qDebug() << "SDL window has been closed. Qt application remains running.";
-    // Additional logic to handle the state after SDL window closure
 }
-
 
 /*
  * Destructor for MainWindow
