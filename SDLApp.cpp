@@ -17,6 +17,11 @@ int squareY = 140;
 
 bool sdlWindowActive = false;
 
+/*
+ * Constructor for SDLApp
+ * Initializes SDL and sets up member variables
+ * @param parent - Parent QObject pointer
+*/
 SDLApp::SDLApp(QObject *parent)
     : QObject(parent), window(nullptr), renderer(nullptr), closeWindowBtnClickedSDL(false),
     textInputMode(false), textInputBuffer(""), font(nullptr) {
@@ -26,11 +31,18 @@ SDLApp::SDLApp(QObject *parent)
     }
 }
 
+/*
+ * Destructor for SDLApp
+ * Cleans up SDL resources
+*/
 SDLApp::~SDLApp() {
     cleanUp();
 }
-// Initializes SDLApp
-bool SDLApp::init() {
+
+/*
+ * Initializes SDLApp
+ * @return bool - True if initialization succeeds, false otherwise
+*/bool SDLApp::init() {
     qDebug() << "Initializing SDLApp...";
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         qDebug() << "SDL_Init Error:" << SDL_GetError();
@@ -58,8 +70,9 @@ bool SDLApp::init() {
     return initTextAndImages();
 }
 
-// Cleans up SDL resources specific to the window
-void SDLApp::cleanUpSDLWindow() {
+/*
+ * Cleans up SDL resources specific to the window
+*/void SDLApp::cleanUpSDLWindow() {
     if (renderer) {
         SDL_DestroyRenderer(renderer);
         renderer = nullptr;
@@ -72,10 +85,9 @@ void SDLApp::cleanUpSDLWindow() {
     qDebug() << "SDL resources have been released.";
 }
 
-
-
-// Cleans up all SDL resources
-void SDLApp::cleanUp() {
+/*
+ * Cleans up all SDL resources
+*/void SDLApp::cleanUp() {
     cleanUpSDLWindow(); // Ensure window-specific resources are cleaned first
 
     if (font) {
@@ -90,8 +102,9 @@ void SDLApp::cleanUp() {
     qDebug() << "SDLApp cleaned up and quit.";
 }
 
-
-void SDLApp::openOrToggleWindow() {
+/*
+ * Opens or toggles the visibility of the SDL window
+*/void SDLApp::openOrToggleWindow() {
     if (window == nullptr) {
         if (!init()) {
             qDebug() << "Failed to initialize SDLApp.";
@@ -103,6 +116,10 @@ void SDLApp::openOrToggleWindow() {
     }
 }
 
+/*
+ * Checks the current position of the cursor relative to the SDL window
+ * @return bool - True if the cursor is inside the SDL window, false otherwise
+*/
 bool SDLApp::checkCursorLocation() {
     int mouseX, mouseY;
     SDL_GetGlobalMouseState(&mouseX, &mouseY); // Get the cursor position relative to the screen
@@ -161,10 +178,10 @@ void SDLApp::bringWindowToFront() {
 }
 #endif
 
-
-
-
-
+/*
+ * Initializes textures and fonts required for rendering text and images
+ * @return bool - True if initialization succeeds, false otherwise
+*/
 bool SDLApp::initTextAndImages() {
     std::string fullPath(__FILE__);
     std::filesystem::path pathObj(fullPath);
@@ -188,13 +205,19 @@ bool SDLApp::initTextAndImages() {
 
     return true;
 }
-void SDLApp::handleQuit() {
+
+/*
+ * Handles the quit event by cleaning up the SDL window and associated resources
+ * and emitting a signal indicating that the SDL window has closed
+*/void SDLApp::handleQuit() {
     cleanUpSDLWindow(); // Cleanup the SDL window and associated resources
     emit sdlWindowClosed(); // Signal that the SDL window has closed
     qDebug() << "SDL resources cleaned up and SDL_Quit() called.";
 }
 
-void SDLApp::processEvents()
+/*
+ * Processes SDL events such as user input and window events
+*/void SDLApp::processEvents()
 {
     SDL_Event e;
     bool running = true;
@@ -302,10 +325,14 @@ void SDLApp::handleButtonClick(SDL_Event &event)
 }
 
 /*
- * Checks if mouse is hovering over button
- * @param mouseX, mouseY            - coordinates of cursor
- * @param buttonX, buttonY          - coordinates of button
- * @param buttonWidth, buttonHeigth - dimensions of button
+ * Checks if the mouse cursor is inside a button
+ * @param mouseX - The x-coordinate of the mouse cursor
+ * @param mouseY - The y-coordinate of the mouse cursor
+ * @param buttonX - The x-coordinate of the top-left corner of the button
+ * @param buttonY - The y-coordinate of the top-left corner of the button
+ * @param buttonWidth - The width of the button
+ * @param buttonHeight - The height of the button
+ * @return bool - True if the mouse cursor is inside the button, false otherwise
 */
 bool SDLApp::isMouseInsideButton(
     int mouseX, int mouseY, int buttonX, int buttonY, int buttonWidth, int buttonHeight)
@@ -314,7 +341,10 @@ bool SDLApp::isMouseInsideButton(
             && mouseY <= buttonY + buttonHeight);
 }
 
-
+/*
+ * Handles text input events
+ * @param event - The SDL event containing the text input
+*/
 void SDLApp::handleTextInput(SDL_Event &event) {
     if (textInputMode) {
         textInputBuffer += event.text.text;
@@ -322,12 +352,19 @@ void SDLApp::handleTextInput(SDL_Event &event) {
     }
 }
 
+/*
+ * Submits text entered by the user
+ * @param text - The text entered by the user
+*/
 void SDLApp::submitText(const std::string &text) {
     qDebug() << "Emitting textEntered signal with text:" << QString::fromStdString(text);
     this->submittedText = "Message from mainwindow: " + text;
     render();
 }
 
+/*
+ * Renders the SDL window with various elements such as text, buttons, and images
+*/
 void SDLApp::render() {
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // Red, for visibility
     SDL_RenderClear(renderer);
@@ -368,29 +405,13 @@ void SDLApp::render() {
     SDL_RenderPresent(renderer);
 }
 
-// void SDLApp::cleanUp() {
-//     if (renderer) {
-//         SDL_DestroyRenderer(renderer);
-//         renderer = nullptr;
-//     }
-//     if (window) {
-//         SDL_DestroyWindow(window);
-//         window = nullptr;
-//     }
-//     if (font) {
-//         TTF_CloseFont(font);
-//         font = nullptr;
-//     }
-//     if (imageTexture) {
-//         SDL_DestroyTexture(imageTexture);
-//         imageTexture = nullptr;
-//     }
-//     TTF_Quit();
-//     IMG_Quit();
-//     SDL_Quit();
-//     qDebug() << "SDLApp cleaned up and quit.";
-// }
-
+/*
+ * Creates a texture from the provided message using the initialized font
+ * @param message - The text to create the texture from
+ * @param textWidth - Reference to store the width of the created texture
+ * @param textHeight - Reference to store the height of the created texture
+ * @return SDL_Texture* - Pointer to the created texture, or nullptr if creation fails
+*/
 SDL_Texture *SDLApp::createTextTexture(const std::string &message, int &textWidth, int &textHeight) {
     if (!font) {
         qDebug() << "Font not initialized.";
@@ -414,6 +435,13 @@ SDL_Texture *SDLApp::createTextTexture(const std::string &message, int &textWidt
     return texture;
 }
 
+/*
+ * Renders a message from the main window on the specified renderer at the given position with the provided font size
+ * @param message - The message to render
+ * @param x - The x-coordinate of the top-left corner of the message
+ * @param y - The y-coordinate of the top-left corner of the message
+ * @param fontSize - The font size of the message
+*/
 void SDLApp::renderMessageFromMainwindow(const std::string &message, int x, int y, int fontSize) {
     int textWidth, textHeight;
     SDL_Texture *texture = createTextTexture(message, textWidth, textHeight);
@@ -424,6 +452,12 @@ void SDLApp::renderMessageFromMainwindow(const std::string &message, int x, int 
     SDL_DestroyTexture(texture);
 }
 
+/*
+ * @param renderer - The SDL renderer to render the button on
+ * @param text - The text to display on the button
+ * @param x - The x-coordinate of the top-left corner of the button
+ * @param y - The y-coordinate of the top-left corner of the button
+*/
 void SDLApp::renderButton(SDL_Renderer *renderer, const char *text, int x, int y) {
     SDL_SetRenderDrawColor(renderer, 211, 211, 211, 255);
     SDL_Rect buttonRect = {x, y, BUTTON_WIDTH, BUTTON_HEIGHT};
